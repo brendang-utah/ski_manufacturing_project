@@ -7,18 +7,32 @@
     <style>
         .btn { margin: 2px; }
         .product-item { border: 1px solid #ddd; margin: 10px 0; padding: 10px; }
+        #auth-status { position: absolute; top: 10px; right: 10px; }
     </style>
 </head>
 <body>
+    <div id="auth-status">
+        {% if user.is_authenticated %}
+            Welcome, {{ user.username }}!
+            <a href="{% url 'logout' %}">Logout</a>
+        {% else %}
+            <a href="{% url 'login' %}">Login</a>
+        {% endif %}
+    </div>
+
     <h1>Product List</h1>
 
-    {% if user.is_authenticated and user.role == "employee" %}
+    {% if user.is_authenticated and user.is_staff %}
         <a href="#" id="add-product" class="btn btn-primary">Add Product</a>
     {% endif %}
 
     <div id="product-list"></div>
 
     <script>
+    // Pass staff status from Django to JS
+    var isStaff = {{ user.is_staff|yesno:"true,false" }};
+    var isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
+
     // Utility to get CSRF token from cookies
     function getCookie(name) {
         let cookieValue = null;
@@ -26,7 +40,6 @@
             const cookies = document.cookie.split(';');
             for (let i = 0; i < cookies.length; i++) {
                 const cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
                 if (cookie.substring(0, name.length + 1) === (name + '=')) {
                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                     break;
@@ -60,10 +73,10 @@
                             <p>Size: ${product.size}</p>
                             <p>Price: $${product.price}</p>
                             ${product.imagepath ? `<img src="${product.imagepath}" width="200">` : ''}
-                            {% if user.is_authenticated and user.role == "employee" %}
+                            ${isStaff ? `
                                 <button class="btn btn-warning edit-product">Edit</button>
                                 <button class="btn btn-danger delete-product">Delete</button>
-                            {% endif %}
+                            ` : ''}
                         </div>
                     `;
                     $('#product-list').append(productHtml);
