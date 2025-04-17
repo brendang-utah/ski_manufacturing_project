@@ -1,27 +1,23 @@
 from rest_framework import serializers
-from .models import User, Employee, Customer, Product, RawMaterial, Payment, Order, OrderLine, Report, Return
+from .models import Employee, Customer, Product, RawMaterial, Payment, Order, OrderLine, Report, Return
+from django.contrib.auth.models import User
 
+
+#serializers
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'password', 'first_name', 'last_name', 'email', 'role']
-        extra_kwargs = {'password': {'write_only': True}}  # Hide password in responses
+        fields = ['username', 'email', 'first_name', 'last_name']
+        
 
 # Use this for WRITE operations (creating/updating employees)
 class EmployeeWriteSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username')
     password = serializers.CharField(source='user.password', write_only=True)
-    first_name = serializers.CharField(source='user.first_name')
-    last_name = serializers.CharField(source='user.last_name')
-    email = serializers.EmailField(source='user.email')
-    role = serializers.CharField(source='user.role')
-
+    
     class Meta:
         model = Employee
-        fields = [
-            'username', 'password', 'first_name', 'last_name', 
-            'email', 'role', 'position', 'training_status'
-        ]
+        fields = ['username', 'password', 'position', 'training_status']
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')

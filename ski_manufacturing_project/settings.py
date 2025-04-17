@@ -139,6 +139,8 @@ CSRF_USE_SESSIONS = True
 
 #login and redirect url stuff
 
-LOGIN_REDIRECT_URL = '/'  # or any page we need after login
+LOGIN_REDIRECT_URL = '/products/'  # or any page we need after login
 
 LOGIN_URL = '/accounts/login/'
+
+AUTH_USER_MODEL = 'auth.User' # Default user model

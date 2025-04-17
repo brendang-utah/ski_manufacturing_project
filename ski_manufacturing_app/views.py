@@ -3,6 +3,7 @@ from rest_framework import generics, permissions, status
 from .models import *
 from .serializers import *
 from django.contrib.auth.mixins import LoginRequiredMixin 
+from django.views.generic import TemplateView
 
 # API Views
 # User Views
@@ -17,7 +18,7 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
 # Employee Views
 class IsEmployee(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.role == 'employee'
+        return request.user.is_staff
     
     
 class EmployeeListCreateView(generics.ListCreateAPIView):
@@ -53,6 +54,9 @@ class ProductListCreateView(LoginRequiredMixin,generics.ListCreateAPIView):
         if self.request.method == 'POST':
             return [IsEmployee()]
         return super().get_permissions()
+
+class ProductListPageView(LoginRequiredMixin, TemplateView):
+    template_name = 'products.html'
 
 class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
