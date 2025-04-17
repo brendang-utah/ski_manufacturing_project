@@ -1,0 +1,7 @@
+To-Do
+
+login page redirect if not logged in
+create 
+consider moving urls under current url file to a new one called api_urls or smthng
+
+need to redo serializers to use read and write

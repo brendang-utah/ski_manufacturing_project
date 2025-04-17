@@ -19,5 +19,7 @@ from django.urls import include, path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('ski_manufacturing_app.urls')),
+    path('api/', include('ski_manufacturing_app.urls')),  # API endpoints see to-do for more info on this
+    path('accounts/', include('django.contrib.auth.urls')), #login url
+    path('products/', include('ski_manufacturing_app.template_urls')),  # Future non-API pages
 ]

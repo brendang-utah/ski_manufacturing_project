@@ -56,7 +56,7 @@ ROOT_URLCONF = 'ski_manufacturing_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -123,3 +123,22 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+#rest framework
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ]
+}
+
+# CSRF settings (token auth)
+CSRF_COOKIE_SECURE = True  # For HTTPS
+CSRF_USE_SESSIONS = True
+
+#login and redirect url stuff
+
+LOGIN_REDIRECT_URL = '/'  # or any page we need after login
+
+LOGIN_URL = '/accounts/login/'

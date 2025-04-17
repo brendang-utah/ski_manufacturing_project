@@ -1,16 +1,5 @@
 from django.urls import path
-from .views import (
-    UserListCreateView, UserDetailView,
-    EmployeeListCreateView, EmployeeDetailView,
-    CustomerListCreateView, CustomerDetailView,
-    ProductListCreateView, ProductDetailView,
-    RawMaterialListCreateView, RawMaterialDetailView,
-    PaymentListCreateView, PaymentDetailView,
-    OrderListCreateView, OrderDetailView,
-    OrderLineListCreateView, OrderLineDetailView,
-    ReportListCreateView, ReportDetailView,
-    ReturnListCreateView, ReturnDetailView
-)
+from .views import *
 
 # API URLs
 urlpatterns = [
@@ -47,8 +36,8 @@ urlpatterns = [
     path('orderlines/<int:pk>/', OrderLineDetailView.as_view(), name='orderline-detail'),
 
     # Report
-    path('reports/', ReportListCreateView.as_view(), name='report-list-create'),
-    path('reports/<int:pk>/', ReportDetailView.as_view(), name='report-detail'),
+    # path('reports/', ReportListCreateView.as_view(), name='report-list-create'),
+    # path('reports/<int:pk>/', ReportDetailView.as_view(), name='report-detail'),
 
     # Return
     path('returns/', ReturnListCreateView.as_view(), name='return-list-create'),

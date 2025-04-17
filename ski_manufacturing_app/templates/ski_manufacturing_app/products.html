@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Product List</title>
+    <!-- Include jQuery from CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .btn { margin: 2px; }
+        .product-item { border: 1px solid #ddd; margin: 10px 0; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Product List</h1>
+
+    {% if user.is_authenticated and user.role == "employee" %}
+        <a href="#" id="add-product" class="btn btn-primary">Add Product</a>
+    {% endif %}
+
+    <div id="product-list"></div>
+
+    <script>
+    // Utility to get CSRF token from cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    var csrftoken = getCookie('csrftoken');
+
+    // Load products on page load
+    $(document).ready(function() {
+        loadProducts();
+    });
+
+    function loadProducts() {
+        $.ajax({
+            url: '/api/products/',
+            type: 'GET',
+            dataType: 'json',
+            success: function(products) {
+                $('#product-list').empty();
+                if (products.length === 0) {
+                    $('#product-list').append('<p>No products found.</p>');
+                }
+                products.forEach(function(product) {
+                    let productHtml = `
+                        <div class="product-item" data-id="${product.id}">
+                            <h2>${product.name}</h2>
+                            <p>${product.description || ''}</p>
+                            <p>Size: ${product.size}</p>
+                            <p>Price: $${product.price}</p>
+                            ${product.imagepath ? `<img src="${product.imagepath}" width="200">` : ''}
+                            {% if user.is_authenticated and user.role == "employee" %}
+                                <button class="btn btn-warning edit-product">Edit</button>
+                                <button class="btn btn-danger delete-product">Delete</button>
+                            {% endif %}
+                        </div>
+                    `;
+                    $('#product-list').append(productHtml);
+                });
+            },
+            error: function(error) {
+                $('#product-list').html('<p>Error loading products.</p>');
+            }
+        });
+    }
+
+    // Delete product (employee only)
+    $('#product-list').on('click', '.delete-product', function() {
+        if (!confirm('Are you sure you want to delete this product?')) return;
+        let productId = $(this).closest('.product-item').data('id');
+        $.ajax({
+            url: `/api/products/${productId}/`,
+            type: 'DELETE',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function() {
+                loadProducts(); // Refresh the list
+            },
+            error: function(error) {
+                alert('Error deleting product.');
+            }
+        });
+    });
+
+    // You can add similar handlers for Edit and Add Product
+    </script>
+</body>
+</html>

@@ -1,7 +1,8 @@
 from django.shortcuts import render
-from rest_framework import generics
-from .models import User, Employee, Customer, Product, RawMaterial, Payment, Order, OrderLine, Report, Return
-from .serializers import UserSerializer, EmployeeSerializer, CustomerSerializer, ProductSerializer, RawMaterialSerializer, PaymentSerializer, OrderSerializer, OrderLineSerializer, ReportSerializer, ReturnSerializer
+from rest_framework import generics, permissions, status
+from .models import *
+from .serializers import *
+from django.contrib.auth.mixins import LoginRequiredMixin 
 
 # API Views
 # User Views
@@ -14,13 +15,23 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
 
 # Employee Views
+class IsEmployee(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.role == 'employee'
+    
+    
 class EmployeeListCreateView(generics.ListCreateAPIView):
     queryset = Employee.objects.all()
-    serializer_class = EmployeeSerializer
-
+    
+    def get_serializer_class(self):
+            # Use WriteSerializer for POST, ReadSerializer for GET
+            return EmployeeWriteSerializer if self.request.method == 'POST' else EmployeeReadSerializer
 class EmployeeDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Employee.objects.all()
-    serializer_class = EmployeeSerializer
+
+    def get_serializer_class(self):
+        # Use WriteSerializer for POST, ReadSerializer for GET
+        return EmployeeWriteSerializer if self.request.method == 'POST' else EmployeeReadSerializer
 
 # Customer Views
 class CustomerListCreateView(generics.ListCreateAPIView):
@@ -32,13 +43,21 @@ class CustomerDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CustomerSerializer
 
 # Product Views
-class ProductListCreateView(generics.ListCreateAPIView):
+class ProductListCreateView(LoginRequiredMixin,generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    
+    
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsEmployee()]
+        return super().get_permissions()
 
 class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    permission_classes = [IsEmployee()]
 
 # RawMaterial Views
 class RawMaterialListCreateView(generics.ListCreateAPIView):
@@ -77,13 +96,13 @@ class OrderLineDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = OrderLineSerializer
 
 # Report Views
-class ReportListCreateView(generics.ListCreateAPIView):
-    queryset = Report.objects.all()
-    serializer_class = ReportSerializer
+# class ReportListCreateView(generics.ListCreateAPIView):
+#     queryset = Report.objects.all()
+#     serializer_class = ReportSerializer
 
-class ReportDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Report.objects.all()
-    serializer_class = ReportSerializer
+# class ReportDetailView(generics.RetrieveUpdateDestroyAPIView):
+#     queryset = Report.objects.all()
+#     serializer_class = ReportSerializer
 
 # Return Views
 class ReturnListCreateView(generics.ListCreateAPIView):
