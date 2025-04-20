@@ -3,6 +3,7 @@ To-Do
 fix urls (seperate apis into another page)
 
 consider moving urls under current url file to a new one called api_urls or smthng
+- completed by brendan, changed urls to api_urls
 
 need to redo serializers to use read and write
 
@@ -30,6 +31,8 @@ trenton commit tracking:
 -reworked employee and customer models 
 
 
+brendan commit tracking:
+- added orders page
 
 
 
