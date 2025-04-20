@@ -142,7 +142,7 @@ CORS_ALLOW_CREDENTIALS = True  # If using CORS middleware
 
 #login and redirect url stuff
 
-LOGIN_REDIRECT_URL = '/products/'  # or any page we need after login
+LOGIN_REDIRECT_URL = '/homepage/'  # or any page we need after login
 
 LOGIN_URL = '/accounts/login/'
 

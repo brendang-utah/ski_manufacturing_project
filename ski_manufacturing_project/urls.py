@@ -26,5 +26,5 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')), #login url
     path('', include('ski_manufacturing_app.template_urls')),  # Future non-API pages
     path('login/', auth_views.LoginView.as_view(), name='login'), #login url
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'), #logout url
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'), #logout url WE DONT HAVE  ALOGOUT FUNCITON YET
 ]

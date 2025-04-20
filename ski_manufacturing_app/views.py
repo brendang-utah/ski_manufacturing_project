@@ -93,11 +93,11 @@ class PaymentDetailView(generics.RetrieveUpdateDestroyAPIView):
 # Order Views
 class OrderListCreateView(generics.ListCreateAPIView):
     queryset = Order.objects.all()
-    serializer_class = OrderSerializer
+    serializer_class = OrderReadSerializer
 
 class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Order.objects.all()
-    serializer_class = OrderSerializer
+    serializer_class = OrderReadSerializer
     
 class OrderListPageView(LoginRequiredMixin, TemplateView):
     template_name = 'orders.html'
