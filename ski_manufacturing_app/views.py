@@ -142,6 +142,11 @@ class OrderCreate(CreateView):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_order(request):
+    # --- Add this block right at the start ---
+    if not hasattr(request.user, 'customer'):
+        return Response({'error': 'You must have a customer profile to place an order.'}, status=status.HTTP_400_BAD_REQUEST)
+    # -----------------------------------------
+
     try:
         # Get product info
         product_id = request.data.get('product_id')
@@ -216,10 +221,17 @@ class BuyProductView(DetailView):
             if response.status_code == 201:
                 return redirect('order-confirmation')
             
+            try:
+                error_data = response.json()
+                error_msg = error_data.get('error') or error_data.get('detail') or 'Order failed'
+            except Exception:
+                error_msg = response.text if response.text else 'Order failed'
+
             return render(request, self.template_name, {
-                'error': response.json().get('error', 'Order failed'),
+                'error': error_msg,
                 'product': product
             })
+
             
         except Exception as e:
             return render(request, self.template_name, {
@@ -228,7 +240,42 @@ class BuyProductView(DetailView):
             })
 
         
-        # Call order creation API
+        # Call order creation API@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_order(request):
+    # --- Add this block right at the start ---
+    if not hasattr(request.user, 'customer'):
+        return Response({'error': 'You must have a customer profile to place an order.'}, status=status.HTTP_400_BAD_REQUEST)
+    # -----------------------------------------
+
+    try:
+        # Get product info
+        product_id = request.data.get('product_id')
+        quantity = int(request.data.get('quantity', 1))
+        product = Product.objects.get(id=product_id)
+        
+        # Create order data without payment
+        order_data = {
+            "customer": request.user.customer.id,
+            "status": "completed",
+            "order_lines": [{
+                "product": product_id,
+                "quantity": quantity,
+                "unit_price": str(product.price),
+                "total_price": str(product.price * quantity)
+            }]
+        }
+
+        serializer = OrderWriteSerializer(data=order_data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
         response = create_order(request._request)
         if response.status_code == 201:
             return redirect('order-confirmation')

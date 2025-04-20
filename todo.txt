@@ -1,32 +1,15 @@
 To-Do
 
-- add product page
+- CRUD operations for users and employees (same page, add ability to classify user as employee)
 - homepage button on all pages
 - logout functionality
-- Order CRUD
+- Order CRUD finish
 
-
-deleted code:
-deleted user b/c django has built in user model that simplified auth
-old model:
-class User(models.Model):
-    username = models.CharField(max_length=150, unique=True)
-    password = models.CharField(max_length=255)
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
-    phone_number = models.CharField(max_length=20, blank=True, null=True)
-    address = models.TextField(blank=True, null=True)
-    role = models.CharField(max_length=50)
-
-    def __str__(self):
-        return self.username
 
 
 
 trenton commit tracking:
-- removed user and added built in user to model
--reworked employee and customer models 
+
 
 
 brendan commit tracking:
