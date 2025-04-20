@@ -24,13 +24,6 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
-class RawMaterial(models.Model):
-    type = models.CharField(max_length=200)
-    quantity_available = models.IntegerField()
-
-    def __str__(self):
-        return self.type
-
 class Payment(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     payment_method = models.CharField(max_length=50)
