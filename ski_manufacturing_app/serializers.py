@@ -56,15 +56,21 @@ class PaymentSerializer(serializers.ModelSerializer):
         model = Payment
         fields = '__all__'
 
-class OrderSerializer(serializers.ModelSerializer):
-    customer = CustomerSerializer()
-    payment = PaymentSerializer()
+class OrderReadSerializer(serializers.ModelSerializer):
+    customer = CustomerSerializer(read_only=True)
+    payment = PaymentSerializer(read_only=True)
+    
     class Meta:
         model = Order
         fields = '__all__'
 
+class OrderWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['customer', 'payment', 'status']
+
 class OrderLineSerializer(serializers.ModelSerializer):
-    order = OrderSerializer()
+    order = OrderReadSerializer() # Use OrderReadSerializer for read-only fields
     product = ProductSerializer()
     class Meta:
         model = OrderLine
@@ -77,7 +83,7 @@ class OrderLineSerializer(serializers.ModelSerializer):
 
 class ReturnSerializer(serializers.ModelSerializer):
     product = ProductSerializer()
-    order = OrderSerializer()
+    order = OrderReadSerializer() # Use OrderReadSerializer for read-only fields
     class Meta:
         model = Return
         fields = '__all__'
