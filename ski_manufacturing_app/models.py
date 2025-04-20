@@ -24,19 +24,8 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
-class Payment(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    payment_method = models.CharField(max_length=50)
-    payment_details = models.TextField()
-    exp_date = models.DateField()
-    status = models.CharField(max_length=50)
-
-    def __str__(self):
-        return f"Payment {self.id} - {self.status}"
-
 class Order(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    payment = models.ForeignKey(Payment, on_delete=models.CASCADE)
     status = models.CharField(max_length=50)
     date = models.DateTimeField(auto_now_add=True)
 

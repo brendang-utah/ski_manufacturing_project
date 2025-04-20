@@ -8,6 +8,8 @@ urlpatterns = [
     path('products/', ProductListPageView.as_view(), name='product-page'),
     path('products/<int:pk>/', ProductDetailView.as_view(), name='product-detail'),
     path('products/<int:pk>/edit/', ProductUpdateView.as_view(), name='product-edit'), #go to settings.py and fix these urls so order list can just be /orderlist 
-    path('orderlist', OrderListPageView.as_view(), name='order-page'),
-    path('homepage', HomepageView.as_view(), name='home-page'), 
+    path('orders', OrderListPageView.as_view(), name='order-page'),
+    #path('orders/<int:pk>/', OrderDetailView.as_view(), name='order-detail'),
+    path('buy_product/<int:pk>/', BuyProductView.as_view(), name='buy_product'),
+    path('homepage', HomepageView.as_view(), name='home-page'),
 ]

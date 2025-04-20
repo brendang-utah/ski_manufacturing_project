@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Employee, Customer, Product, Payment, Order, OrderLine
+from .models import Employee, Customer, Product, Order, OrderLine
 from django.contrib.auth.models import User
 
 
@@ -45,16 +45,8 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = '__all__'
 
-
-class PaymentSerializer(serializers.ModelSerializer):
-    customer = CustomerSerializer()
-    class Meta:
-        model = Payment
-        fields = '__all__'
-
 class OrderReadSerializer(serializers.ModelSerializer):
     customer = CustomerSerializer(read_only=True)
-    payment = PaymentSerializer(read_only=True)
     
     class Meta:
         model = Order

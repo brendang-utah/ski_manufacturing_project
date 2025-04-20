@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Buy Product</title>
+    <style>
+        .product-details { border: 1px solid #ddd; padding: 20px; margin: 20px auto; width: 50%; }
+        .btn { margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Buy Product</h1>
+    <div class="product-details">
+        <h2>{{ product.name }}</h2>
+        <p>{{ product.description }}</p>
+        <p>Size: {{ product.size }}</p>
+        <p>Price: ${{ product.price }}</p>
+        {% if product.imagepath %}
+            <img src="{{ product.imagepath }}" alt="{{ product.name }}" width="300">
+        {% endif %}
+        <form id="buy-form">
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" name="quantity" min="1" value="1" required>
+            <br>
+            <label for="card-number">Credit Card Number:</label>
+            <input type="text" id="card-number" name="card_number" maxlength="16" required>
+            <br>
+            <label for="exp-date">Expiration Date:</label>
+            <input type="text" id="exp-date" name="exp_date" placeholder="MM/YY" required>
+            <br>
+            <label for="ccv">CCV:</label>
+            <input type="text" id="ccv" name="ccv" maxlength="3" required>
+            <br>
+            <button type="button" class="btn btn-primary" onclick="submitOrder()">Buy</button>
+        </form>
+    </div>
+
+    <script>
+        function submitOrder() {
+            const productId = {{ product.id }};
+            const quantity = document.getElementById('quantity').value;
+            const cardNumber = document.getElementById('card-number').value;
+            const expDate = document.getElementById('exp-date').value;
+            const ccv = document.getElementById('ccv').value;
+
+            // Validate payment details (basic example)
+            if (!cardNumber || !expDate || !ccv) {
+                alert('Please fill in all payment details.');
+                return;
+            }
+
+            // Send order data to the API
+            fetch('/api/orders/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    product: productId,
+                    quantity: quantity,
+                    payment_details: {
+                        card_number: cardNumber,
+                        exp_date: expDate,
+                        ccv: ccv
+                    }
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Order placed successfully!');
+                    window.location.href = '/orders'; // Redirect to orders page
+                } else {
+                    alert('Failed to place order. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from rest_framework import generics, permissions, status
 from .models import *
 from .serializers import *
@@ -72,16 +72,6 @@ class ProductUpdateView(UpdateView):
     template_name = 'ski_manufacturing_app/product-edit.html'
     success_url = '/products/'
 
-
-# Payment Views
-class PaymentListCreateView(generics.ListCreateAPIView):
-    queryset = Payment.objects.all()
-    serializer_class = PaymentSerializer
-
-class PaymentDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Payment.objects.all()
-    serializer_class = PaymentSerializer
-
 # Order Views
 class OrderListCreateView(generics.ListCreateAPIView):
     queryset = Order.objects.all()
@@ -143,4 +133,40 @@ class OrderDetail(DetailView):
     template_name = 'ski_manufacturing_app/order-detail.html'
     context_object_name = 'order'
 
- 
+#class buy_product:
+class BuyProductView(DetailView):
+    model = Product  # Specify the model to use
+    template_name = 'buy_product.html'  # Specify the template to render
+    context_object_name = 'product'  # Name of the object in the template
+    # Define the URL pattern for this view
+    def buy_product(request, product_id):
+        product = get_object_or_404(Product, id=product_id)
+        if request.method == 'GET':
+            return render(request, 'buy_product.html', {'product': product})
+
+'''
+from django.http import JsonResponse
+
+class BuyProductView(DetailView):
+    def buy_product(request, product_id):
+        product = get_object_or_404(Product, id=product_id)
+        if request.method == 'GET':
+            return render(request, 'buy_product.html', {'product': product})
+        elif request.method == 'POST':
+            data = json.loads(request.body)
+            quantity = data.get('quantity')
+            payment_details = data.get('payment_details')
+
+            # Validate payment details (basic example)
+            if not payment_details or not all(k in payment_details for k in ('card_number', 'exp_date', 'ccv')):
+                return JsonResponse({'error': 'Invalid payment details'}, status=400)
+
+            # Create the order
+            order = Order.objects.create(
+                product=product,
+                user=request.user,
+                quantity=quantity,
+                payment_status='Paid'
+            )
+            return JsonResponse({'message': 'Order placed successfully', 'order_id': order.id}, status=201)
+'''
