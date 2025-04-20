@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Ski Manufacturing{% endblock %}</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .nav-bar {
+            background-color: #f8f9fa;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .nav-bar a {
+            margin-right: 15px;
+            text-decoration: none;
+            color: #333;
+        }
+        .nav-bar a:hover {
+            color: #007bff;
+        }
+        #auth-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .home-button {
+            font-weight: bold;
+            color: #007bff !important;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <div class="nav-bar">
+        <a href="{% url 'home-page' %}" class="home-button">Home</a>
+        <a href="{% url 'product-page' %}">Products</a>
+        <a href="{% url 'order-page' %}">Orders</a>
+        {% if user.is_staff %}
+            <a href="{% url 'admin:index' %}">Admin</a>
+        {% endif %}
+    </div>
+
+    <div id="auth-status">
+        {% if user.is_authenticated %}
+            Welcome, {{ user.username }}!
+            <a href="{% url 'logout' %}">Logout</a>
+        {% else %}
+            <a href="{% url 'login' %}">Login</a>
+        {% endif %}
+    </div>
+
+    {% block content %}
+    {% endblock %}
+
+    {% block extra_scripts %}
+    {% endblock %}
+</body>
+</html>
