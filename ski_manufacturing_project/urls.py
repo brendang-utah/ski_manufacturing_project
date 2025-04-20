@@ -22,7 +22,7 @@ from django.contrib.auth import views as auth_views #for handing simple auth on 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('ski_manufacturing_app.urls')),  # API endpoints see to-do for more info on this
+    path('api/', include('ski_manufacturing_app.api_urls')),  # API endpoints see to-do for more info on this
     path('accounts/', include('django.contrib.auth.urls')), #login url
     path('products/', include('ski_manufacturing_app.template_urls')),  # Future non-API pages
     path('login/', auth_views.LoginView.as_view(), name='login'), #login url
