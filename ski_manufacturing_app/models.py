@@ -60,20 +60,4 @@ class OrderLine(models.Model):
     def __str__(self):
         return f"OrderLine {self.id} - {self.product.name}"
 
-class Report(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    date_range = models.CharField(max_length=100)
-    total_net_sales = models.DecimalField(max_digits=12, decimal_places=2)
-
-    def __str__(self):
-        return f"Report {self.id} - {self.date_range}"
-
-class Return(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    reason = models.TextField()
-
-    def __str__(self):
-        return f"Return {self.id} - {self.reason}"
 
