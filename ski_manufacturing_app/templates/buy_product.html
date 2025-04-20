@@ -27,8 +27,8 @@
             <label for="exp-date">Expiration Date:</label>
             <input type="text" id="exp-date" name="exp_date" placeholder="MM/YY" required>
             <br>
-            <label for="ccv">CCV:</label>
-            <input type="text" id="ccv" name="ccv" maxlength="3" required>
+            <label for="cvv">CVV:</label>
+            <input type="text" id="cvv" name="cvv" maxlength="3" required>
             <br>
             <button type="button" class="btn btn-primary" onclick="submitOrder()">Buy</button>
         </form>
@@ -40,10 +40,10 @@
             const quantity = document.getElementById('quantity').value;
             const cardNumber = document.getElementById('card-number').value;
             const expDate = document.getElementById('exp-date').value;
-            const ccv = document.getElementById('ccv').value;
+            const cvv = document.getElementById('cvv').value;
 
             // Validate payment details (basic example)
-            if (!cardNumber || !expDate || !ccv) {
+            if (!cardNumber || !expDate || !cvv) {
                 alert('Please fill in all payment details.');
                 return;
             }
@@ -61,7 +61,7 @@
                     payment_details: {
                         card_number: cardNumber,
                         exp_date: expDate,
-                        ccv: ccv
+                        cvv: cvv
                     }
                 })
             })
