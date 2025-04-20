@@ -2,26 +2,68 @@
 <html>
 <head>
     <title>Edit Product</title>
+    <style>
+        .container { max-width: 800px; margin: 20px auto; padding: 20px; }
+        .back-link { display: block; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input, textarea { width: 100%; padding: 8px; }
+    </style>
 </head>
 <body>
-    <h1>Edit Product</h1>
-    <form id="edit-product-form">
-        <label>Name: <input type="text" id="name" name="name"></label><br>
-        <label>Description: <textarea id="description" name="description"></textarea></label><br>
-        <label>Makeup: <textarea id="makeup" name="makeup"></textarea></label><br>
-        <label>Size: <input type="text" id="size" name="size"></label><br>
-        <label>Price: <input type="number" step="0.01" id="price" name="price"></label><br>
-        <label>Stock Status: <input type="number" id="stock_status" name="stock_status"></label><br>
-        <label>Image: <input type="file" id="imagepath" name="imagepath"></label><br>
-        <button type="submit">Save Changes</button>
-        <a href="/products/">Cancel</a>
-    </form>
+    <div class="container">
+        <a href="/products/" class="back-link">← Back to Products</a>
+        <h1>Edit Product</h1>
+        
+        <form id="edit-product-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea id="description" name="description" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="makeup">Makeup:</label>
+                <textarea id="makeup" name="makeup" rows="2"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="size">Size:</label>
+                <input type="text" id="size" name="size" required>
+            </div>
+
+            <div class="form-group">
+                <label for="price">Price:</label>
+                <input type="number" step="0.01" id="price" name="price" required>
+            </div>
+
+            <div class="form-group">
+                <label for="stock_status">Stock Status:</label>
+                <input type="number" id="stock_status" name="stock_status" required>
+            </div>
+
+            <div class="form-group">
+                <label for="imagepath">Image:</label>
+                <input type="file" id="imagepath" name="imagepath">
+            </div>
+
+            <div class="form-group">
+                <button type="submit" style="margin-right: 10px;">Save Changes</button>
+                <a href="/products/">Cancel</a>
+            </div>
+        </form>
+    </div>
 
     <script>
-    // Get product ID from URL (assuming /products/<id>/edit/)
+    // Get product ID from URL
     const productId = window.location.pathname.split('/')[2];
 
-    // Fetch product data and populate form
+    // Fetch and populate product data
     fetch(`/api/products/${productId}/`)
       .then(response => response.json())
       .then(product => {
@@ -32,55 +74,30 @@
           document.getElementById('price').value = product.price;
           document.getElementById('stock_status').value = product.stock_status;
       });
-// get cookies
-      function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.startsWith(name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-    
 
-    // Handle form submission
+    // Form submission handler
     document.getElementById('edit-product-form').addEventListener('submit', function(event) {
         event.preventDefault();
-        const form = event.target;
-        const formData = new FormData(form); // Use the form element directly
-    
+        const formData = new FormData(this);
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
         fetch(`/api/products/${productId}/`, {
             method: 'PUT',
             body: formData,
             headers: {
-                'X-CSRFToken': getCookie('csrftoken') // Case-sensitive header
+                'X-CSRFToken': csrfToken
             },
-            credentials: 'include' // Critical for cookies
+            credentials: 'include'
         })
         .then(response => {
-            if (!response.ok) {
-                // Handle non-JSON responses (e.g., Django HTML error pages)
-                return response.text().then(text => {
-                    throw new Error(`HTTP error! Status: ${response.status}. Response: ${text}`);
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            alert('Product updated!');
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
             window.location.href = '/products/';
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Failed to save changes. See console for details.');
+            alert(`Error saving changes: ${error.message}`);
         });
-    });    
+    });
     </script>
 </body>
 </html>

@@ -17,6 +17,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from django.contrib.auth import views as auth_views #for handing simple auth on users
+from django.contrib.auth.views import LoginView
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 
@@ -25,6 +28,10 @@ urlpatterns = [
     path('api/', include('ski_manufacturing_app.api_urls')),  # API endpoints see to-do for more info on this
     path('accounts/', include('django.contrib.auth.urls')), #login url
     path('', include('ski_manufacturing_app.template_urls')),  # Future non-API pages
-    path('login/', auth_views.LoginView.as_view(), name='login'), #login url
+    path('accounts/login/', LoginView.as_view(template_name='login.html'), name='login'), 
     path('logout/', auth_views.LogoutView.as_view(), name='logout'), #logout url WE DONT HAVE  ALOGOUT FUNCITON YET
 ]
+
+# for media pathing issues
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -6,7 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView, DetailView
 from django.views.generic.edit import UpdateView, CreateView
 from rest_framework.authentication import SessionAuthentication
-
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 # API Views
 # User Views
 class UserListCreateView(generics.ListCreateAPIView):
@@ -63,8 +63,8 @@ class ProductListPageView(LoginRequiredMixin, TemplateView):
 class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    authentication_classes = [SessionAuthentication]  # Enforce session auth
-    permission_classes = [permissions.IsAdminUser]  # Restrict to admins
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     
 class ProductUpdateView(UpdateView):
     model = Product

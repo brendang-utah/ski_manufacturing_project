@@ -11,9 +11,12 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent 
 
 
 # Quick-start development settings - unsuitable for production
@@ -29,7 +32,6 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'rest_framework',
     'ski_manufacturing_app',
@@ -133,13 +135,6 @@ REST_FRAMEWORK = {
     ]
 }
 
-# CSRF settings (token auth)
-CSRF_COOKIE_SECURE = True  # For HTTPS
-CSRF_USE_SESSIONS = True
-CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read the CSRF cookie
-CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000']
-CORS_ALLOW_CREDENTIALS = True  # If using CORS middleware
-
 #login and redirect url stuff
 
 LOGIN_REDIRECT_URL = '/homepage/'  # or any page we need after login
@@ -147,3 +142,11 @@ LOGIN_REDIRECT_URL = '/homepage/'  # or any page we need after login
 LOGIN_URL = '/accounts/login/'
 
 AUTH_USER_MODEL = 'auth.User' # Default user model
+CSRF_COOKIE_HTTPONLY = False
+CSRF_USE_SESSIONS = False
+CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000']
+SESSION_COOKIE_SECURE = False  # For local development
+CSRF_COOKIE_SECURE = False     # For local development
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
