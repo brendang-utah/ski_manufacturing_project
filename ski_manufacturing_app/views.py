@@ -3,8 +3,8 @@ from rest_framework import generics, permissions, status
 from .models import *
 from .serializers import *
 from django.contrib.auth.mixins import LoginRequiredMixin 
-from django.views.generic import TemplateView
-from django.views.generic.edit import UpdateView
+from django.views.generic import TemplateView, DetailView
+from django.views.generic.edit import UpdateView, CreateView
 from rest_framework.authentication import SessionAuthentication
 
 # API Views
@@ -132,21 +132,39 @@ class ReturnDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 #def HomepageView(TemplateView): 
-
+class HomepageView(TemplateView):
+    template_name = 'ski_manufacturing_app/homepage.html'
 
 #def PrudoctCreate(ProductView):
-
+class ProductCreate(CreateView):
+    model = Product
+    fields = ['name', 'description', 'makeup', 'size', 'price', 'stock_status', 'imagepath']
+    template_name = 'ski_manufacturing_app/product-create.html'
+    success_url = '/products/'
 
 #def ProductList(ListView):
-
+class ProductDetail(DetailView):
+    model = Product
+    template_name = 'ski_manufacturing_app/product-detail.html'
+    context_object_name = 'product'
 
 #class ProductDetail(DetailView):
-
+class ProductDetail(DetailView):
+    model = Product
+    template_name = 'ski_manufacturing_app/product-detail.html'
+    context_object_name = 'product'
 
 #def OrderCreate(CreateView):
-
+class OrderCreate(CreateView):
+    model = Order
+    fields = ['customer', 'payment', 'status']
+    template_name = 'ski_manufacturing_app/order-create.html'
+    success_url = '/orderlist'
 
 #class OrderDetail(DetailView):
- 
+class OrderDetail(DetailView):
+    model = Order
+    template_name = 'ski_manufacturing_app/order-detail.html'
+    context_object_name = 'order'
 
  

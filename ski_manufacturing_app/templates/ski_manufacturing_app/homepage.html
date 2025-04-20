@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ski Manufacturing - Home</title>
+</head>
+<body>
+    <div id="auth-status">
+        {% if user.is_authenticated %}
+            Welcome, {{ user.username }}!
+            <a href="{% url 'logout' %}">Logout</a>
+        {% else %}
+            <a href="{% url 'login' %}">Login</a>
+        {% endif %}
+    </div>
+
+    <h1>Welcome to Ski Manufacturing</h1>
+    
+    <nav>
+        <a href="{% url 'product-page' %}">Products</a>
+        <a href="{% url 'order-page' %}">Orders</a>
+        {% if user.is_staff %}
+            <a href="{% url 'admin:index' %}">Admin</a>
+        {% endif %}
+    </nav>
+</body>
+</html>
