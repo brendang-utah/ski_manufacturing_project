@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
+{% load static %}
 <head>
+    <link rel="stylesheet" href="{% static 'ski_manufacturing_app/styles.css' %}">
     <title>Ski Manufacturing - Home</title>
 </head>
 <body>
@@ -13,7 +15,7 @@
         {% endif %}
     </div>
 
-    <h1>Welcome to Ski Manufacturing</h1>
+    <h1>Ski Manufacturing Co.</h1>
     
     <nav>
         <a href="{% url 'product-page' %}">Products</a>
