@@ -72,14 +72,6 @@ class ProductUpdateView(UpdateView):
     template_name = 'ski_manufacturing_app/product-edit.html'
     success_url = '/products/'
 
-# RawMaterial Views
-class RawMaterialListCreateView(generics.ListCreateAPIView):
-    queryset = RawMaterial.objects.all()
-    serializer_class = RawMaterialSerializer
-
-class RawMaterialDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = RawMaterial.objects.all()
-    serializer_class = RawMaterialSerializer
 
 # Payment Views
 class PaymentListCreateView(generics.ListCreateAPIView):
@@ -111,23 +103,7 @@ class OrderLineDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = OrderLine.objects.all()
     serializer_class = OrderLineSerializer
 
-# Report Views
-# class ReportListCreateView(generics.ListCreateAPIView):
-#     queryset = Report.objects.all()
-#     serializer_class = ReportSerializer
 
-# class ReportDetailView(generics.RetrieveUpdateDestroyAPIView):
-#     queryset = Report.objects.all()
-#     serializer_class = ReportSerializer
-
-# Return Views
-class ReturnListCreateView(generics.ListCreateAPIView):
-    queryset = Return.objects.all()
-    serializer_class = ReturnSerializer
-
-class ReturnDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Return.objects.all()
-    serializer_class = ReturnSerializer
 
 
 
