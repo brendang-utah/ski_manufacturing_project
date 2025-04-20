@@ -20,8 +20,11 @@ urlpatterns = [
     path('products/<int:pk>/', ProductDetailView.as_view(), name='product-detail'),
 
     # Order
-    path('orders/', OrderListCreateView.as_view(), name='order-list-create'),
+    #path('order-list/', OrderListCreateView.as_view(), name='order-list-create'), #this used to just be orders, I changed it to add functionality to buy_products
+    path('orders/', create_order, name='order-create'), 
     path('orders/<int:pk>/', OrderDetailView.as_view(), name='order-detail'),
+    
+    path('orders/', create_order, name='order-create'),
 
     # OrderLine
     path('orderlines/', OrderLineListCreateView.as_view(), name='orderline-list-create'),
