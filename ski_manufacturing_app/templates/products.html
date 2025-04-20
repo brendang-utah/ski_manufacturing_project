@@ -23,7 +23,7 @@
     <h1>Product List</h1>
 
     {% if user.is_authenticated and user.is_staff %}
-        <a href="#" id="add-product" class="btn btn-primary">Add Product</a>
+        <a href="/products/add/" id="add-product" class="btn btn-primary">Add Product</a>
     {% endif %}
 
     <div id="product-list"></div>

@@ -1,11 +1,9 @@
 To-Do
 
-fix urls (seperate apis into another page)
-
-consider moving urls under current url file to a new one called api_urls or smthng
-- completed by brendan, changed urls to api_urls
-
-need to redo serializers to use read and write
+- add product page
+- homepage button on all pages
+- logout functionality
+- Order CRUD
 
 
 deleted code:

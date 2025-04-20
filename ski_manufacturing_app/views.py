@@ -101,11 +101,11 @@ class OrderLineDetailView(generics.RetrieveUpdateDestroyAPIView):
 class HomepageView(TemplateView):
     template_name = 'ski_manufacturing_app/homepage.html'
 
-#def PrudoctCreate(ProductView):
-class ProductCreate(CreateView):
+# add product view:
+class ProductAddView(CreateView):
     model = Product
     fields = ['name', 'description', 'makeup', 'size', 'price', 'stock_status', 'imagepath']
-    template_name = 'ski_manufacturing_app/product-create.html'
+    template_name = 'ski_manufacturing_app/add-product.html'
     success_url = '/products/'
 
 #def ProductList(ListView):

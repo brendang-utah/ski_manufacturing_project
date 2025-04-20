@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Product</title>
+    <style>
+        .container { max-width: 800px; margin: 20px auto; padding: 20px; }
+        .back-link { display: block; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input, textarea { width: 100%; padding: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/products/" class="back-link">← Back to Products</a>
+        <h1>Add Product</h1>
+        
+        <form id="add-product-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea id="description" name="description" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="makeup">Makeup:</label>
+                <textarea id="makeup" name="makeup" rows="2"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="size">Size:</label>
+                <input type="text" id="size" name="size" required>
+            </div>
+
+            <div class="form-group">
+                <label for="price">Price:</label>
+                <input type="number" step="0.01" id="price" name="price" required>
+            </div>
+
+            <div class="form-group">
+                <label for="stock_status">Stock Status:</label>
+                <input type="number" id="stock_status" name="stock_status" required>
+            </div>
+
+            <div class="form-group">
+                <label for="imagepath">Image:</label>
+                <input type="file" id="imagepath" name="imagepath">
+            </div>
+
+            <div class="form-group">
+                <button type="submit" style="margin-right: 10px;">Add Product</button>
+                <a href="/products/">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+    // Form submission handler for adding a product
+    document.getElementById('add-product-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch('/api/products/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
+            credentials: 'include'
+        })
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            window.location.href = '/products/';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(`Error adding product: ${error.message}`);
+        });
+    });
+    </script>
+</body>
+</html>
