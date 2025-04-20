@@ -67,3 +67,28 @@ Before adding new URLs (like OrderCreate and OrderDetail), you should first:
 Update the frontend JavaScript to match URL patterns
 Test existing functionality
 Then gradually add new routes
+
+
+
+
+
+
+
+
+
+
+
+Created new templates: order-create.html & order-edit.html
+These templates include:
+
+Form handling for creating and editing orders
+API integration for loading customers and products
+Dynamic product entry addition/removal
+Basic styling
+Error handling
+Authentication status display
+To use these templates, you'll need to:
+
+Update your views.py to include the corresponding view classes
+Add the URLs to your template_urls.py
+Ensure your API endpoints support all the required operations
