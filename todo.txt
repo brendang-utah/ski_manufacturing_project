@@ -39,3 +39,31 @@ brendan commit tracking:
 
 I have a new change.
 This is a new change.
+
+
+Your current  ski_manufacturing_project/urls.py has:
+path('', include('ski_manufacturing_app.template_urls'))
+This means all template URLs are already at the root level, not prefixed with 'products/'.
+
+Your JavaScript in products.html and orders.html makes API calls with specific paths like /api/products/ and /api/orders/.
+Your LOGIN_REDIRECT_URL in settings.py is set to '/products/'.
+To safely update the template URLs, here's the recommended change:
+
+ski_manufacturing_app
+from django.urls import path
+from .views import *
+
+urlpatterns = [
+    path('', HomepageView.as_view(), name='homepage'),
+    path('products/', ProductListPageView.as_view(), name='product-page'),
+    path('products/<int:pk>/', ProductDetailView.as_view(), 
+The main changes are:
+
+Added the homepage route at root ('/')
+Added trailing slashes for consistency
+Kept existing URL patterns to maintain compatibility with current frontend code
+Before adding new URLs (like OrderCreate and OrderDetail), you should first:
+
+Update the frontend JavaScript to match URL patterns
+Test existing functionality
+Then gradually add new routes
