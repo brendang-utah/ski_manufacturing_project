@@ -24,7 +24,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('ski_manufacturing_app.urls')),  # API endpoints see to-do for more info on this
     path('accounts/', include('django.contrib.auth.urls')), #login url
-    path('products/', include('ski_manufacturing_app.template_urls')),  # Future non-API pages
+    path('', include('ski_manufacturing_app.template_urls')),  # Future non-API pages
     path('login/', auth_views.LoginView.as_view(), name='login'), #login url
     path('logout/', auth_views.LogoutView.as_view(), name='logout'), #logout url
 ]

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Product</title>
+</head>
+<body>
+    <h1>Edit Product</h1>
+    <form id="edit-product-form">
+        <label>Name: <input type="text" id="name" name="name"></label><br>
+        <label>Description: <textarea id="description" name="description"></textarea></label><br>
+        <label>Makeup: <textarea id="makeup" name="makeup"></textarea></label><br>
+        <label>Size: <input type="text" id="size" name="size"></label><br>
+        <label>Price: <input type="number" step="0.01" id="price" name="price"></label><br>
+        <label>Stock Status: <input type="number" id="stock_status" name="stock_status"></label><br>
+        <label>Image: <input type="file" id="imagepath" name="imagepath"></label><br>
+        <button type="submit">Save Changes</button>
+        <a href="/products/">Cancel</a>
+    </form>
+
+    <script>
+    // Get product ID from URL (assuming /products/<id>/edit/)
+    const productId = window.location.pathname.split('/')[2];
+
+    // Fetch product data and populate form
+    fetch(`/api/products/${productId}/`)
+      .then(response => response.json())
+      .then(product => {
+          document.getElementById('name').value = product.name;
+          document.getElementById('description').value = product.description || '';
+          document.getElementById('makeup').value = product.makeup || '';
+          document.getElementById('size').value = product.size;
+          document.getElementById('price').value = product.price;
+          document.getElementById('stock_status').value = product.stock_status;
+      });
+// get cookies
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+
+    // Handle form submission
+    document.getElementById('edit-product-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form); // Use the form element directly
+    
+        fetch(`/api/products/${productId}/`, {
+            method: 'PUT',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken') // Case-sensitive header
+            },
+            credentials: 'include' // Critical for cookies
+        })
+        .then(response => {
+            if (!response.ok) {
+                // Handle non-JSON responses (e.g., Django HTML error pages)
+                return response.text().then(text => {
+                    throw new Error(`HTTP error! Status: ${response.status}. Response: ${text}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            alert('Product updated!');
+            window.location.href = '/products/';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to save changes. See console for details.');
+        });
+    });    
+    </script>
+</body>
+</html>

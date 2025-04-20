@@ -4,6 +4,8 @@ from .models import *
 from .serializers import *
 from django.contrib.auth.mixins import LoginRequiredMixin 
 from django.views.generic import TemplateView
+from django.views.generic.edit import UpdateView
+from rest_framework.authentication import SessionAuthentication
 
 # API Views
 # User Views
@@ -61,7 +63,14 @@ class ProductListPageView(LoginRequiredMixin, TemplateView):
 class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [IsEmployee()]
+    authentication_classes = [SessionAuthentication]  # Enforce session auth
+    permission_classes = [permissions.IsAdminUser]  # Restrict to admins
+    
+class ProductUpdateView(UpdateView):
+    model = Product
+    fields = ['name', 'description', 'makeup', 'size', 'price', 'stock_status', 'imagepath']
+    template_name = 'ski_manufacturing_app/product-edit.html'
+    success_url = '/products/'
 
 # RawMaterial Views
 class RawMaterialListCreateView(generics.ListCreateAPIView):

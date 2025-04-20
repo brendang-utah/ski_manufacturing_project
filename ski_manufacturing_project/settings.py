@@ -136,6 +136,9 @@ REST_FRAMEWORK = {
 # CSRF settings (token auth)
 CSRF_COOKIE_SECURE = True  # For HTTPS
 CSRF_USE_SESSIONS = True
+CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read the CSRF cookie
+CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000']
+CORS_ALLOW_CREDENTIALS = True  # If using CORS middleware
 
 #login and redirect url stuff
 

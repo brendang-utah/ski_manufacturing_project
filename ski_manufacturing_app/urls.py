@@ -16,8 +16,8 @@ urlpatterns = [
     path('customers/<int:pk>/', CustomerDetailView.as_view(), name='customer-detail'),
 
     # Product
-    path('productsedit/', ProductListCreateView.as_view(), name='product-list-create'),
-    path('productsedit/<int:pk>/', ProductDetailView.as_view(), name='product-detail'),
+    path('products/', ProductListCreateView.as_view(), name='product-list-create'),
+    path('products/<int:pk>/', ProductDetailView.as_view(), name='product-detail'),
 
     # RawMaterial
     path('rawmaterials/', RawMaterialListCreateView.as_view(), name='rawmaterial-list-create'),

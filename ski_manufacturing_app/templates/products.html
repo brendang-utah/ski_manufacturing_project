@@ -74,7 +74,7 @@
                             <p>Price: $${product.price}</p>
                             ${product.imagepath ? `<img src="${product.imagepath}" width="200">` : ''}
                             ${isStaff ? `
-                                <button class="btn btn-warning edit-product">Edit</button>
+                                <button class="btn btn-warning edit-product" onclick="window.location.href='/products/' + ${product.id} + '/edit/'">Edit</button>
                                 <button class="btn btn-danger delete-product">Delete</button>
                             ` : ''}
                         </div>
