@@ -76,11 +76,13 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         return order
 
 class OrderReadSerializer(serializers.ModelSerializer):
-    customer = serializers.StringRelatedField()
-    order_lines = OrderLineSerializer(many=True, source='orderline_set')  # Add source
+    customer_name = serializers.CharField(source='customer.user.username')
+    order_lines = OrderLineSerializer(many=True, source='orderline_set')
+    
     class Meta:
         model = Order
-        fields = '__all__'
+        fields = ['id', 'status', 'date', 'customer_name', 'order_lines']
+
 
 
 

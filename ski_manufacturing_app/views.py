@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticate
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from .models import User, Employee, Customer, Product, Order, OrderLine
+from django.views.generic.edit import DeleteView
 from .serializers import (
     UserSerializer, EmployeeWriteSerializer, EmployeeReadSerializer,
     CustomerSerializer, ProductSerializer, OrderReadSerializer,
@@ -98,10 +99,48 @@ class OrderListPageView(LoginRequiredMixin, ListView):
 class OrderListCreateView(generics.ListCreateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderReadSerializer
-
+#for api
 class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderReadSerializer
+    
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+from django.views.generic.edit import UpdateView
+from django.urls import reverse_lazy
+
+class OrderEditView(LoginRequiredMixin, UpdateView):
+    model = Order
+    fields = ['status']
+    template_name = 'order-edit.html'
+    context_object_name = 'order'
+    success_url = reverse_lazy('order-page')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['order_lines'] = OrderLine.objects.filter(order=self.object)
+        return context
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            return redirect('order-page')
+        return super().dispatch(request, *args, **kwargs)
+
+
+class OrderDeleteView(LoginRequiredMixin, DeleteView):
+    model = Order
+    success_url = reverse_lazy('order-page')
+    
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            return redirect(self.success_url)
+        return super().dispatch(request, *args, **kwargs)
+
 
 # Template Views
 class HomepageView(TemplateView):

@@ -7,6 +7,7 @@
         #auth-status { position: absolute; top: 10px; right: 10px; }
     </style>
 </head>
+
 <body>
     <div id="auth-status">
         {% if user.is_authenticated %}
@@ -18,7 +19,6 @@
     </div>
 
     <h1>Order List</h1>
-
 
     {% for order_data in orders_with_details %}
         <div class="order-item">
@@ -38,6 +38,7 @@
                 {% endfor %}
             </ul>
 
+            <a href="{% url 'order-edit' order_data.order.id %}" class="edit-button">Edit Order</a>
         </div>
     {% empty %}
         <p>No orders found.</p>
