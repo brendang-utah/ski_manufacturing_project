@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit User</title>
+    <style>
+        .container { max-width: 800px; margin: 20px auto; padding: 20px; }
+        .back-link { display: block; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input { width: 100%; padding: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/users/" class="back-link">← Back to Users</a>
+        <h1>Edit User</h1>
+        
+        <form id="edit-user-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password (leave blank to keep current):</label>
+                <input type="password" id="password" name="password">
+            </div>
+
+            <div class="form-group">
+                <label for="is_staff">Is Staff:</label>
+                <input type="checkbox" id="is_staff" name="is_staff">
+            </div>
+
+            <div class="form-group">
+                <button type="submit" style="margin-right: 10px;">Save Changes</button>
+                <a href="/users/">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+    // Get user ID from URL
+    const userId = window.location.pathname.split('/')[2];
+
+    // Fetch and populate user data
+    fetch(`/api/users/${userId}/`)
+      .then(response => response.json())
+      .then(user => {
+          document.getElementById('username').value = user.username;
+          document.getElementById('email').value = user.email;
+          document.getElementById('is_staff').checked = user.is_staff;
+      });
+
+    // Form submission handler
+    document.getElementById('edit-user-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // Convert FormData to JSON
+        const userData = {};
+        formData.forEach((value, key) => {
+            if (key === 'is_staff') {
+                userData[key] = document.getElementById(key).checked; // Handle checkbox
+            } else if (key === 'password' && value === '') {
+                // Skip password if left blank
+                return;
+            } else {
+                userData[key] = value;
+            }
+        });
+
+        fetch(`/api/users/${userId}/`, {
+            method: 'PUT',
+            body: JSON.stringify(userData),
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            credentials: 'include'
+        })
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            window.location.href = '/users/';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(`Error saving changes: ${error.message}`);
+        });
+    });
+    </script>
+</body>
+</html>

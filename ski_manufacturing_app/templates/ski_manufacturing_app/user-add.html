@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add User</title>
+    <style>
+        .container { max-width: 800px; margin: 20px auto; padding: 20px; }
+        .back-link { display: block; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input { width: 100%; padding: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/users/" class="back-link">← Back to Users</a>
+        <h1>Add User</h1>
+        
+        <form id="add-user-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <div class="form-group">
+                <label for="is_staff">Is Staff:</label>
+                <input type="checkbox" id="is_staff" name="is_staff">
+            </div>
+
+            <div class="form-group">
+                <button type="submit" style="margin-right: 10px;">Add User</button>
+                <a href="/users/">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+    // Form submission handler for adding a user
+    document.getElementById('add-user-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // Convert FormData to JSON
+        const userData = {};
+        formData.forEach((value, key) => {
+            if (key === 'is_staff') {
+                userData[key] = document.getElementById(key).checked; // Handle checkbox
+            } else {
+                userData[key] = value;
+            }
+        });
+
+        fetch('/api/users/', {
+            method: 'POST',
+            body: JSON.stringify(userData),
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            credentials: 'include'
+        })
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            window.location.href = '/users/';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(`Error adding user: ${error.message}`);
+        });
+    });
+    </script>
+</body>
+</html>

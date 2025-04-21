@@ -19,6 +19,19 @@ from .serializers import (
 # API Views
 class UserListPageView(LoginRequiredMixin, TemplateView):
     template_name = 'users.html'
+    
+class UserAddView(CreateView):
+    model = User
+    role = "user"
+    fields = ['username','email','password']
+    template_name = 'ski_manufacturing_app/user-add.html'
+    success_url = '/users/'
+    
+class UserUpdateView(UpdateView):
+    model = Product
+    fields = ['username','email','password']
+    template_name = 'ski_manufacturing_app/user-edit.html'
+    success_url = '/users/'
 
 class UserListCreateView(generics.ListCreateAPIView):
     queryset = User.objects.all()
