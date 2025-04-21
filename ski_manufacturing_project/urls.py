@@ -20,7 +20,7 @@ from django.contrib.auth import views as auth_views #for handing simple auth on 
 from django.contrib.auth.views import LoginView
 from django.conf import settings
 from django.conf.urls.static import static
-
+from django.contrib.auth.views import LogoutView
 
 
 urlpatterns = [
@@ -29,7 +29,7 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')), #login url
     path('', include('ski_manufacturing_app.template_urls')),  # Future non-API pages
     path('accounts/login/', LoginView.as_view(template_name='login.html'), name='login'), 
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'), #logout url WE DONT HAVE  ALOGOUT FUNCITON YET
+    path('accounts/logout/', LogoutView.as_view(template_name='registration/logout.html'), name='logout'),
 ]
 
 # for media pathing issues

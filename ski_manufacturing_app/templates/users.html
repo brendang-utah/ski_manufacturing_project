@@ -40,15 +40,18 @@
         }
     </style>
 
-<body class="bg-light">
-    <div id="auth-status" class="d-flex align-items-center gap-2">
-        {% if user.is_authenticated %}
-            <span>Welcome, {{ user.username }}!</span>
-            <a href="{% url 'logout' %}" class="btn btn-sm btn-outline-secondary">Logout</a>
-        {% else %}
-            <a href="{% url 'login' %}" class="btn btn-sm btn-primary">Login</a>
-        {% endif %}
-    </div>
+    <body class="bg-light">
+        <div id="auth-status" class="d-flex align-items-center gap-2">
+            {% if user.is_authenticated %}
+                <span>Welcome, {{ user.username }}!</span>
+                <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-secondary">Logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-sm btn-primary">Login</a>
+            {% endif %}
+        </div>
 
     <div class="user-list-container">
         <h1 class="mb-4">User Management</h1>
