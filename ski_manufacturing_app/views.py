@@ -16,6 +16,9 @@ from .serializers import (
 )
 
 # API Views
+class UserListPageView(LoginRequiredMixin, TemplateView):
+    template_name = 'users.html'
+
 class UserListCreateView(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer

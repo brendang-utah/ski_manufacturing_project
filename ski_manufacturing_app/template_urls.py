@@ -13,4 +13,6 @@ urlpatterns = [
     #path('orders/<int:pk>/', OrderDetailView.as_view(), name='order-detail'),
     path('buy_product/<int:pk>/', BuyProductView.as_view(), name='buy_product'),
     path('homepage', HomepageView.as_view(), name='home-page'),
+    path('users/', UserListPageView.as_view(), name='user-page'),
+    
 ]
