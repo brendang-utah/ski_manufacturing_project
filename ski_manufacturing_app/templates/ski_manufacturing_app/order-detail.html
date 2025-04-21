@@ -1,0 +1,102 @@
+{% extends 'ski_manufacturing_app/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Order #{{ order.id }}</h2>
+    
+    <div class="order-details">
+        <p><strong>Status:</strong> 
+            {% if user.is_staff %}
+            <select id="status-select" class="form-control">
+                {% for status_code, status_label in order.STATUS_CHOICES %}
+                <option value="{{ status_code }}" {% if order.status == status_code %}selected{% endif %}>
+                    {{ status_label }}
+                </option>
+                {% endfor %}
+            </select>
+            {% else %}
+            {{ order.get_status_display }}
+            {% endif %}
+        </p>
+        <p><strong>Customer:</strong> {{ order.customer.user.username }}</p>
+        <p><strong>Date:</strong> {{ order.date }}</p>
+        <p><strong>Last Updated:</strong> {{ order.updated_at }}</p>
+    </div>
+
+    <div class="order-lines">
+        <h3>Order Items</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for line in order.orderline_set.all %}
+                <tr>
+                    <td>{{ line.product.name }}</td>
+                    <td>{{ line.quantity }}</td>
+                    <td>${{ line.unit_price }}</td>
+                    <td>${{ line.total_price }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if user.is_staff %}
+    <div class="order-notes mt-4">
+        <h3>Notes</h3>
+        <textarea id="order-notes" class="form-control">{{ order.notes }}</textarea>
+        <button id="save-notes" class="btn btn-primary mt-2">Save Notes</button>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+$(document).ready(function() {
+    $('#status-select').change(function() {
+        const newStatus = $(this).val();
+        $.ajax({
+            url: `/api/orders/${order.id}/`,
+            type: 'PATCH',
+            data: JSON.stringify({ status: newStatus }),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            success: function(response) {
+                alert('Status updated successfully');
+            },
+            error: function(xhr) {
+                alert('Error updating status: ' + xhr.responseText);
+                // Reset to previous status
+                $('#status-select').val('{{ order.status }}');
+            }
+        });
+    });
+
+    $('#save-notes').click(function() {
+        const notes = $('#order-notes').val();
+        $.ajax({
+            url: `/api/orders/${order.id}/`,
+            type: 'PATCH',
+            data: JSON.stringify({ notes: notes }),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            success: function(response) {
+                alert('Notes saved successfully');
+            },
+            error: function(xhr) {
+                alert('Error saving notes: ' + xhr.responseText);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

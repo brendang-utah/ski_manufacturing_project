@@ -45,6 +45,7 @@
         <a href="{% url 'product-page' %}">Products</a>
         <a href="{% url 'order-page' %}">Orders</a>
         {% if user.is_staff %}
+            <a href="{% url 'employee-page' %}">Employees</a>
             <a href="{% url 'admin:index' %}">Admin</a>
         {% endif %}
     </div>

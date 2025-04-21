@@ -247,3 +247,35 @@ def create_order(request):
             
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class EmployeeListPageView(LoginRequiredMixin, TemplateView):
+    template_name = 'employees.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            return redirect('home-page')
+        return super().dispatch(request, *args, **kwargs)
+
+class OrderCreateView(LoginRequiredMixin, TemplateView):
+    template_name = 'ski_manufacturing_app/order-create.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['products'] = Product.objects.all()
+        return context
+
+class OrderDetailView(LoginRequiredMixin, DetailView):
+    model = Order
+    template_name = 'ski_manufacturing_app/order-detail.html'
+    context_object_name = 'order'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['STATUS_CHOICES'] = Order.STATUS_CHOICES
+        return context
+
+    def dispatch(self, request, *args, **kwargs):
+        order = self.get_object()
+        if not request.user.is_staff and order.customer.user != request.user:
+            return redirect('order-list')
+        return super().dispatch(request, *args, **kwargs)
