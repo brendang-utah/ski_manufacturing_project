@@ -3,96 +3,148 @@
 {% block title %}Product List{% endblock %}
 
 {% block content %}
-    <h1>Product List</h1>
-
-    {% if user.is_authenticated and user.is_staff %}
-        <a href="{% url 'add-product' %}" id="add-product" class="btn btn-primary">Add Product</a>
-    {% endif %}
-
-    <div id="product-list"></div>
+    <!-- Include jQuery and Bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-        .btn { margin: 2px; }
-        .product-item { border: 1px solid #ddd; margin: 10px 0; padding: 10px; }
-        #auth-status { position: absolute; top: 10px; right: 10px; }
+        .product-list-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .product-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .product-card h3 {
+            color: #0d6efd;
+            margin-bottom: 10px;
+        }
+        .product-actions {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+        #auth-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
     </style>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-    const isStaff = {{ user.is_staff|yesno:"true,false" }};
-    const isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
+    <body class="bg-light">
+        <div id="auth-status" class="d-flex align-items-center gap-2">
+            {% if user.is_authenticated %}
+                <span>Welcome, {{ user.username }}!</span>
+                <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-secondary">Logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-sm btn-primary">Login</a>
+            {% endif %}
+        </div>
 
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
+        <div class="product-list-container">
+            <h1 class="mb-4">Product List</h1>
+
+            {% if user.is_authenticated and user.is_staff %}
+                <a href="{% url 'add-product' %}" id="add-product" class="btn btn-primary mb-4">
+                    <i class="bi bi-plus-circle"></i> Add Product
+                </a>
+            {% endif %}
+
+            <div id="product-list" class="mb-4"></div>
+        </div>
+
+        <script>
+        const isStaff = {{ user.is_staff|yesno:"true,false" }};
+        const isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
                 }
             }
+            return cookieValue;
         }
-        return cookieValue;
-    }
-    const csrftoken = getCookie('csrftoken');
+        const csrftoken = getCookie('csrftoken');
 
-    $(document).ready(function() {
-        loadProducts();
-    });
+        $(document).ready(function() {
+            loadProducts();
+        });
 
-    function loadProducts() {
-        $.ajax({
-            url: '/api/products/',
-            type: 'GET',
-            dataType: 'json',
-            success: function(products) {
-                $('#product-list').empty();
-                if (products.length === 0) {
-                    $('#product-list').append('<p>No products found.</p>');
+        function loadProducts() {
+            $.ajax({
+                url: '/api/products/',
+                type: 'GET',
+                dataType: 'json',
+                success: function(products) {
+                    $('#product-list').empty();
+                    if (products.length === 0) {
+                        $('#product-list').html('<div class="alert alert-info">No products found</div>');
+                        return;
+                    }
+                    products.forEach(function(product) {
+                        let productHtml = `
+                            <div class="product-card" data-id="${product.id}">
+                                <h3>${product.name}</h3>
+                                <div class="product-details">
+                                    <p class="mb-1"><strong>Description:</strong> ${product.description || ''}</p>
+                                    <p class="mb-1"><strong>Size:</strong> ${product.size}</p>
+                                    <p class="mb-1"><strong>Price:</strong> $${product.price}</p>
+                                    ${product.imagepath ? `<img src="${product.imagepath}" alt="${product.name}" width="200" class="my-2">` : ''}
+                                </div>
+                                <div class="product-actions">
+                                    <button class="btn btn-success btn-sm buy-now" onclick="window.location.href='/orders/create/?product=${product.id}'">Buy Now</button>
+                                    ${isStaff ? `
+                                        <button class="btn btn-warning btn-sm edit-product" onclick="window.location.href='/products/${product.id}/edit/'">Edit</button>
+                                        <button class="btn btn-danger btn-sm delete-product">Delete</button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `;
+                        $('#product-list').append(productHtml);
+                    });
+                },
+                error: function(error) {
+                    $('#product-list').html('<div class="alert alert-danger">Error loading products</div>');
                 }
-                products.forEach(function(product) {
-                    let productHtml = `
-                        <div class="product-item" data-id="${product.id}">
-                            <h2>${product.name}</h2>
-                            <p>${product.description || ''}</p>
-                            <p>Size: ${product.size}</p>
-                            <p>Price: $${product.price}</p>
-                            ${product.imagepath ? `<img src="${product.imagepath}" alt="${product.name}" width="200">` : ''}
-                            <button class="btn btn-success buy-now" onclick="window.location.href='/products/${product.id}/buy/'">Buy Now</button>
-                            ${isStaff ? `
-                                <button class="btn btn-warning edit-product" onclick="window.location.href='/products/${product.id}/edit/'">Edit</button>
-                                <button class="btn btn-danger delete-product">Delete</button>
-                            ` : ''}
-                        </div>
-                    `;
-                    $('#product-list').append(productHtml);
-                });
-            },
-            error: function(error) {
-                $('#product-list').html('<p>Error loading products.</p>');
-            }
-        });
-    }
+            });
+        }
 
-    $('#product-list').on('click', '.delete-product', function() {
-        if (!confirm('Are you sure you want to delete this product?')) return;
-        let productId = $(this).closest('.product-item').data('id');
-        $.ajax({
-            url: `/api/products/${productId}/`,
-            type: 'DELETE',
-            headers: {
-                'X-CSRFToken': csrftoken,
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            success: function() {
-                loadProducts();
-            },
-            error: function(error) {
-                alert('Error deleting product.');
-            }
+        $('#product-list').on('click', '.delete-product', function() {
+            if (!confirm('Are you sure you want to delete this product?')) return;
+            let productId = $(this).closest('.product-card').data('id');
+            $.ajax({
+                url: `/api/products/${productId}/`,
+                type: 'DELETE',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                success: function() {
+                    loadProducts();
+                },
+                error: function(error) {
+                    alert('Error deleting product.');
+                }
+            });
         });
-    });
-    </script>
+        </script>
+    </body>
 {% endblock %}
