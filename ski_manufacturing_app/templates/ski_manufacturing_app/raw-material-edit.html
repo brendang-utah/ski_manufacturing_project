@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Raw Materials</title>
+    <style>
+        .container { max-width: 800px; margin: 20px auto; padding: 20px; }
+        .back-link { display: block; margin-bottom: 20px; }
+        .material-list { list-style-type: none; padding: 0; }
+        .material-item { padding: 10px; border: 1px solid #ccc; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/raw-materials" class="back-link">← Back to Raw Materials</a>
+        <h1>Add Raw Materials</h1>
+        
+        <form id="edit-raw-material-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="quantity">Quantity:</label>
+                <input id="quantity" name="quantity" required>
+            </div>
+
+            <div class="form-group">
+                <label for="cost_per_unit">Cost per unit:</label>
+                <input id="cost_per_unit" name="cost_per_unit" required>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" style="margin-right: 10px;">Add Raw Material</button>
+                <a href="/raw-material/">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const rawMaterialId = window.location.pathname.split('/')[2];
+    
+        // Fetch raw material data
+        fetch(`/api/raw-materials/${rawMaterialId}/`)
+            .then(response => {
+                if (!response.ok) throw new Error('Raw material not found');
+                return response.json();
+            })
+            .then(rawMaterial => {
+                document.getElementById('name').value = rawMaterial.name;
+                document.getElementById('quantity').value = rawMaterial.quantity;
+                document.getElementById('cost_per_unit').value = rawMaterial.cost_per_unit;
+            })
+            .catch(error => {
+                alert(error.message);
+                window.location.href = '/raw-materials/';
+            });
+    
+        // Handle form submission
+        document.getElementById('edit-raw-material-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = {
+                name: document.getElementById('name').value,
+                quantity: document.getElementById('quantity').value,
+                cost_per_unit: document.getElementById('cost_per_unit').value
+            };
+    
+            fetch(`/api/raw-materials/${rawMaterialId}/`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/raw-materials/';
+                } else {
+                    throw new Error('Update failed');
+                }
+            })
+            .catch(error => alert(error.message));
+        });
+    </script>
+</body>
+</html>

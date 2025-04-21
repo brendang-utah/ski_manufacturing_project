@@ -187,6 +187,7 @@ class OrderDeleteView(LoginRequiredMixin, DeleteView):
 class RawMaterialListPageView(LoginRequiredMixin, TemplateView):
     template_name = 'raw-material.html'
     
+
     
 
     
@@ -211,6 +212,13 @@ class RawMaterialDetailView(generics.RetrieveUpdateDestroyAPIView):
   #  fields = ['name', 'quantity', 'cost_per_unit']
    # template_name = 'ski_manufacturing_app/raw-material-add.html'
     #success_url = '/raw-material/'
+
+class RawMaterialUpdateView(UpdateView):
+    model = RawMaterial
+    fields = ['name', 'quantity', 'cost_per_unit']
+    template_name = 'ski_manufacturing_app/raw-material-edit.html'
+    success_url = '/raw-material/'
+
 
 
 # Template Views

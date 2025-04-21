@@ -24,4 +24,5 @@ urlpatterns = [
     path('employees/<int:pk>/edit/', EmployeeUpdateView.as_view(), name='employee-edit'),
     path('raw-materials/', RawMaterialListPageView.as_view(), name='raw-materials-page'),
     #path('raw-materials/add/', RawMaterialAddView.as_view(), name='raw-materials-page'),
+    path('raw-materials/<int:pk>/edit', RawMaterialUpdateView.as_view(), name='edit-raw-material'),
 ]
