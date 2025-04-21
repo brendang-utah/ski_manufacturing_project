@@ -8,6 +8,7 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from django.db import transaction
 from .models import User, Employee, Customer, Product, Order, OrderLine, RawMaterial
 from django.views.generic.edit import DeleteView
 from .serializers import (
@@ -51,9 +52,31 @@ class IsEmployee(permissions.BasePermission):
 
 class EmployeeListCreateView(generics.ListCreateAPIView):
     queryset = Employee.objects.all()
+    permission_classes = [IsAuthenticated, IsEmployee]
     
     def get_serializer_class(self):
-        return EmployeeWriteSerializer if self.request.method == 'POST' else EmployeeReadSerializer
+        if self.request.method == 'POST':
+            return EmployeeWriteSerializer
+        return EmployeeReadSerializer
+
+    def create(self, request, *args, **kwargs):
+        try:
+            # Start a transaction to ensure atomicity
+            with transaction.atomic():
+                serializer = self.get_serializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                employee = serializer.save()
+                headers = self.get_success_headers(serializer.data)
+                return Response(
+                    EmployeeReadSerializer(employee).data, 
+                    status=status.HTTP_201_CREATED, 
+                    headers=headers
+                )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 class EmployeeDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Employee.objects.all()
@@ -295,6 +318,22 @@ def create_order(request):
 
 class EmployeeListPageView(LoginRequiredMixin, TemplateView):
     template_name = 'employees.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            return redirect('home-page')
+        return super().dispatch(request, *args, **kwargs)
+
+class EmployeeAddView(LoginRequiredMixin, TemplateView):
+    template_name = 'ski_manufacturing_app/employee-add.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            return redirect('home-page')
+        return super().dispatch(request, *args, **kwargs)
+
+class EmployeeUpdateView(LoginRequiredMixin, TemplateView):
+    template_name = 'ski_manufacturing_app/employee-edit.html'
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_staff:

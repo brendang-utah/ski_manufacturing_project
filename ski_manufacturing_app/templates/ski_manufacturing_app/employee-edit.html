@@ -1,0 +1,112 @@
+{% extends 'ski_manufacturing_app/base.html' %}
+
+{% block title %}Edit Employee{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Edit Employee</h2>
+                </div>
+                <div class="card-body">
+                    <form id="edit-employee-form">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" class="form-control" id="username" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="first_name">First Name</label>
+                            <input type="text" class="form-control" id="first_name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="last_name">Last Name</label>
+                            <input type="text" class="form-control" id="last_name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="position">Position</label>
+                            <input type="text" class="form-control" id="position" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="training_status">Training Status</label>
+                            <select class="form-control" id="training_status">
+                                <option value="true">Trained</option>
+                                <option value="false">In Training</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <a href="{% url 'employee-page' %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+$(document).ready(function() {
+    const employeeId = window.location.pathname.split('/')[2];
+    
+    // Load employee data
+    $.ajax({
+        url: `/api/employees/${employeeId}/`,
+        type: 'GET',
+        success: function(employee) {
+            $('#username').val(employee.user.username);
+            $('#first_name').val(employee.user.first_name);
+            $('#last_name').val(employee.user.last_name);
+            $('#email').val(employee.user.email);
+            $('#position').val(employee.position);
+            $('#training_status').val(employee.training_status.toString());
+        },
+        error: function(xhr) {
+            alert('Error loading employee details');
+        }
+    });
+
+    $('#edit-employee-form').on('submit', function(e) {
+        e.preventDefault();
+        
+        const employeeData = {
+            username: $('#username').val(),
+            first_name: $('#first_name').val(),
+            last_name: $('#last_name').val(),
+            email: $('#email').val(),
+            position: $('#position').val(),
+            training_status: $('#training_status').val() === 'true'
+        };
+
+        $.ajax({
+            url: `/api/employees/${employeeId}/`,
+            type: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify(employeeData),
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            success: function() {
+                window.location.href = '{% url "employee-page" %}';
+            },
+            error: function(xhr) {
+                alert('Error updating employee: ' + xhr.responseText);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

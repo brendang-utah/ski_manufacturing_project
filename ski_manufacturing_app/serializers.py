@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from .models import Employee, Customer, Product, Order, OrderLine, RawMaterial
 from django.contrib.auth.models import User
+from django.db import transaction
+from .models import Employee, Customer, Product, Order, OrderLine, RawMaterial
 
 
 #serializers
@@ -32,17 +33,40 @@ class UserSerializer(serializers.ModelSerializer):
 
 # Use this for WRITE operations (creating/updating employees)
 class EmployeeWriteSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username')
-    password = serializers.CharField(source='user.password', write_only=True)
-    
+    username = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, style={'input_type': 'password'})
+    first_name = serializers.CharField(write_only=True)
+    last_name = serializers.CharField(write_only=True)
+    email = serializers.EmailField(write_only=True)
+    position = serializers.CharField()
+    training_status = serializers.BooleanField()
+
     class Meta:
         model = Employee
-        fields = ['username', 'password', 'position', 'training_status']
+        fields = ['username', 'password', 'first_name', 'last_name', 'email', 'position', 'training_status']
 
+    @transaction.atomic
     def create(self, validated_data):
-        user_data = validated_data.pop('user')
-        user = User.objects.create_user(**user_data)  # Create User first
-        return Employee.objects.create(user=user, **validated_data)
+        # Extract user-related fields
+        user_fields = {
+            'username': validated_data.pop('username'),
+            'password': validated_data.pop('password'),
+            'first_name': validated_data.pop('first_name'),
+            'last_name': validated_data.pop('last_name'),
+            'email': validated_data.pop('email'),
+        }
+
+        # Create the User instance first
+        user = User.objects.create_user(**user_fields)
+        
+        # Create the Employee instance
+        employee = Employee.objects.create(
+            user=user,
+            position=validated_data['position'],
+            training_status=validated_data['training_status']
+        )
+        
+        return employee
 
 # Use this for READ operations (listing employees)
 class EmployeeReadSerializer(serializers.ModelSerializer):
