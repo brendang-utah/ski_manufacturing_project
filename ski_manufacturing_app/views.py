@@ -8,12 +8,12 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from .models import User, Employee, Customer, Product, Order, OrderLine
+from .models import User, Employee, Customer, Product, Order, OrderLine, RawMaterial
 from django.views.generic.edit import DeleteView
 from .serializers import (
     UserSerializer, EmployeeWriteSerializer, EmployeeReadSerializer,
     CustomerSerializer, ProductSerializer, OrderReadSerializer,
-    OrderWriteSerializer, OrderLineSerializer
+    OrderWriteSerializer, OrderLineSerializer, RawMaterialSerializer
 )
 
 # API Views
@@ -160,6 +160,34 @@ class OrderDeleteView(LoginRequiredMixin, DeleteView):
         if not request.user.is_staff:
             return redirect(self.success_url)
         return super().dispatch(request, *args, **kwargs)
+
+class RawMaterialListPageView(LoginRequiredMixin, TemplateView):
+    template_name = 'raw-material.html'
+    
+    
+
+    
+class RawMaterialListCreateView(LoginRequiredMixin, generics.ListCreateAPIView):
+    queryset = RawMaterial.objects.all()
+    serializer_class = RawMaterialSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsEmployee()]
+        return super().get_permissions()
+
+class RawMaterialDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = RawMaterial.objects.all()
+    serializer_class = RawMaterialSerializer
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+#class RawMaterialAddView(CreateView):
+ #   model = RawMaterial
+  #  fields = ['name', 'quantity', 'cost_per_unit']
+   # template_name = 'ski_manufacturing_app/raw-material-add.html'
+    #success_url = '/raw-material/'
 
 
 # Template Views

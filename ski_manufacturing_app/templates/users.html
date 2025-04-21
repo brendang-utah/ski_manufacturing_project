@@ -1,6 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
+{% extends 'ski_manufacturing_app/base.html' %}
+
+{% block title %}User List{% endblock %}
+
+{% block content %}
+
     <title>User List</title>
     <!-- Include jQuery and Bootstrap -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -36,7 +39,7 @@
             border-radius: 5px;
         }
     </style>
-</head>
+
 <body class="bg-light">
     <div id="auth-status" class="d-flex align-items-center gap-2">
         {% if user.is_authenticated %}
@@ -151,5 +154,4 @@ $('#user-list').on('click', '.delete-user', function() {
 });
 
     </script>
-</body>
-</html>
+{% endblock %}

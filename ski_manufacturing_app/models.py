@@ -43,4 +43,10 @@ class OrderLine(models.Model):
     def __str__(self):
         return f"OrderLine {self.id} - {self.product.name}"
 
+class RawMaterial(models.Model):
+    name = models.CharField(max_length=200)
+    quantity = models.IntegerField()
+    cost_per_unit = models.DecimalField(max_digits=10, decimal_places=2)
 
+    def __str__(self):
+        return self.name

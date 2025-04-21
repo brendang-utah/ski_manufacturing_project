@@ -26,6 +26,9 @@ urlpatterns = [
     
     path('orders/', create_order, name='order-create'),
 
+    path('raw-materials/', RawMaterialListCreateView.as_view(), name='user-list-create'),
+    path('raw-materials/<int:pk>/', RawMaterialDetailView.as_view(), name='user-detail'),
+    
     # OrderLine
     # path('orderlines/', OrderLineListCreateView.as_view(), name='orderline-list-create'),
     # path('orderlines/<int:pk>/', OrderLineDetailView.as_view(), name='orderline-detail'),

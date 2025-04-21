@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Employee, Customer, Product, Order, OrderLine
+from .models import Employee, Customer, Product, Order, OrderLine, RawMaterial
 from django.contrib.auth.models import User
 
 
@@ -104,7 +104,10 @@ class OrderReadSerializer(serializers.ModelSerializer):
         fields = ['id', 'status', 'date', 'customer_name', 'order_lines']
 
 
-
+class RawMaterialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RawMaterial
+        fields = '__all__'
 
 
 

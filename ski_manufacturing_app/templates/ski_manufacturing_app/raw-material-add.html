@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Raw Materials</title>
+    <style>
+        .container { max-width: 800px; margin: 20px auto; padding: 20px; }
+        .back-link { display: block; margin-bottom: 20px; }
+        .material-list { list-style-type: none; padding: 0; }
+        .material-item { padding: 10px; border: 1px solid #ccc; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Dashboard</a>
+        <h1>Raw Materials</h1>
+        
+        <ul id="raw-material-list" class="material-list">
+            <!-- Raw materials will be dynamically inserted here -->
+        </ul>
+    </div>
+
+    <script>
+    // Fetch and display raw materials
+    document.addEventListener('DOMContentLoaded', function() {
+        const rawMaterialList = document.getElementById('raw-material-list');
+
+        fetch('/api/raw-materials/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+        })
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            // Populate the list with raw materials
+            data.forEach(material => {
+                const listItem = document.createElement('li');
+                listItem.className = 'material-item';
+                listItem.textContent = `Name: ${material.name}, Quantity: ${material.quantity}, Unit: ${material.unit}`;
+                rawMaterialList.appendChild(listItem);
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(`Error fetching raw materials: ${error.message}`);
+        });
+    });
+    </script>
+</body>
+</html>

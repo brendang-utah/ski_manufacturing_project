@@ -20,4 +20,6 @@ urlpatterns = [
     path('user/<int:pk>/', UserDetailView.as_view(), name='user-detail'),
     path('users/<int:pk>/edit/', UserUpdateView.as_view(), name='user-edit'),
     path('employees/', EmployeeListPageView.as_view(), name='employee-page'),
+    path('raw-materials/', RawMaterialListPageView.as_view(), name='raw-materials-page'),
+    #path('raw-materials/add/', RawMaterialAddView.as_view(), name='raw-materials-page'),
 ]
