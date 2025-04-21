@@ -207,11 +207,11 @@ class RawMaterialDetailView(generics.RetrieveUpdateDestroyAPIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-#class RawMaterialAddView(CreateView):
- #   model = RawMaterial
-  #  fields = ['name', 'quantity', 'cost_per_unit']
-   # template_name = 'ski_manufacturing_app/raw-material-add.html'
-    #success_url = '/raw-material/'
+class RawMaterialAddView(CreateView):
+    model = RawMaterial
+    fields = ['name', 'quantity', 'cost_per_unit']
+    template_name = 'ski_manufacturing_app/raw-material-add.html'
+    success_url = '/raw-material/'
 
 class RawMaterialUpdateView(UpdateView):
     model = RawMaterial

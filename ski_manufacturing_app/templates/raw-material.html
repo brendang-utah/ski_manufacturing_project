@@ -6,6 +6,7 @@
     <h1>Raw Material List</h1>
 
     {% if user.is_authenticated and user.is_staff %}
+        <a href="{% url 'add-raw-material' %}" id="add-raw-material" class="btn btn-primary">Add Raw Material</a>}
     {% endif %}
 
     <div id="raw-material-list"></div>
