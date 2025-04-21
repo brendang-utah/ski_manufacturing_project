@@ -29,9 +29,8 @@
     <div id="user-list"></div>
 
     <script>
-    // Pass staff status from Django to JS
-    var isStaff = {{ user.is_staff|yesno:"true,false" }};
-    var isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
+    var isStaff = "{{ user.is_staff|yesno:'true,false' }}";
+    var isAuthenticated = "{{ user.is_authenticated|yesno:'true,false' }}";
 
     // Utility to get CSRF token from cookies
     function getCookie(name) {
@@ -48,7 +47,7 @@
         }
         return cookieValue;
     }
-    var csrftoken = getCookie('csrftoken');
+    const csrftoken = getCookie('csrftoken');
 
     // Load users on page load
     $(document).ready(function() {

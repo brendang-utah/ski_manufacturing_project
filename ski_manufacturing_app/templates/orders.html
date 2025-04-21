@@ -28,6 +28,10 @@
 {% block content %}
     <h1>Order List</h1>
 
+    {% if user.is_staff %}
+        <a href="{% url 'order-create' %}" class="edit-button">Create Order</a>
+    {% endif %}
+
     <div id="order-list">
         <!-- Orders will be loaded here dynamically -->
     </div>
@@ -51,6 +55,7 @@
         return cookieValue;
     }
     const csrftoken = getCookie('csrftoken');
+    const isStaff = "{{ user.is_staff|yesno:'true,false' }}";
 
     // Load orders on page load
     $(document).ready(function() {
@@ -69,18 +74,33 @@
                 }
 
                 orders.forEach(function(order) {
+                    let orderLines = '';
+                    if (order.order_lines) {
+                        orderLines = '<h3>Order Items:</h3><ul>';
+                        order.order_lines.forEach(function(line) {
+                            orderLines += `
+                                <li>
+                                    ${line.product_name} - 
+                                    Quantity: ${line.quantity} - 
+                                    Unit Price: $${line.unit_price} - 
+                                    Total: $${line.total_price}
+                                </li>`;
+                        });
+                        orderLines += '</ul>';
+                    }
+
                     const orderHtml = `
                         <div class="order-item" data-id="${order.id}">
                             <h2>Order #${order.id}</h2>
                             <p class="order-status">Status: ${order.status}</p>
-                            <p>Customer: ${order.customer_name}</p>
-                            <p>Date: ${order.date}</p>
-                            <p>Product: ${order.product_name}</p>
-                            <p>Quantity: ${order.quantity}</p>
+                            <p>Customer: ${order.customer_name || 'N/A'}</p>
+                            <p>Date: ${new Date(order.created_at).toLocaleDateString()}</p>
+                            ${orderLines}
+                            <p>Total Order Amount: $${order.total_amount || '0.00'}</p>
                             
                             <div class="order-actions">
-                                <a href="/orders/${order.id}/" class="edit-button">Edit Order</a>
                                 ${isStaff ? `
+                                    <a href="/orders/${order.id}/" class="edit-button">Edit Order</a>
                                     <button class="delete-button" onclick="deleteOrder(${order.id})">Delete Order</button>
                                 ` : ''}
                             </div>
@@ -104,18 +124,17 @@
             url: `/api/orders/${orderId}/`,
             type: 'DELETE',
             headers: {
-                'X-CSRFToken': csrftoken
+                'X-CSRFToken': csrftoken,
+                'X-Requested-With': 'XMLHttpRequest'
             },
             success: function() {
-                loadOrders(); // Refresh the list
+                loadOrders();
             },
             error: function(xhr, status, error) {
                 alert('Error deleting order: ' + error);
             }
         });
     }
-
-    // Add staff check variable
-    const isStaff = {{ user.is_staff|yesno:"true,false" }};
+    
 </script>
 {% endblock %}
