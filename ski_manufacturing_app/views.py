@@ -1,23 +1,21 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.views.generic import TemplateView, DetailView
-from django.views.generic.edit import UpdateView, CreateView
+from django.views.generic import TemplateView, DetailView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-
 from rest_framework import generics, permissions, status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from .models import User, Employee, Customer, Product, Order, OrderLine
+from .serializers import (
+    UserSerializer, EmployeeWriteSerializer, EmployeeReadSerializer,
+    CustomerSerializer, ProductSerializer, OrderReadSerializer,
+    OrderWriteSerializer, OrderLineSerializer
+)
 
-import requests  # Used in BuyProductView.post
-
-from .models import *
-from .serializers import *
 # API Views
-# User Views
 class UserListCreateView(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -26,26 +24,22 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-# Employee Views
 class IsEmployee(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_staff
-    
-    
+
 class EmployeeListCreateView(generics.ListCreateAPIView):
     queryset = Employee.objects.all()
     
     def get_serializer_class(self):
-            # Use WriteSerializer for POST, ReadSerializer for GET
-            return EmployeeWriteSerializer if self.request.method == 'POST' else EmployeeReadSerializer
-class EmployeeDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Employee.objects.all()
-
-    def get_serializer_class(self):
-        # Use WriteSerializer for POST, ReadSerializer for GET
         return EmployeeWriteSerializer if self.request.method == 'POST' else EmployeeReadSerializer
 
-# Customer Views
+class EmployeeDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Employee.objects.all()
+    
+    def get_serializer_class(self):
+        return EmployeeWriteSerializer if self.request.method == 'POST' else EmployeeReadSerializer
+
 class CustomerListCreateView(generics.ListCreateAPIView):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
@@ -54,34 +48,53 @@ class CustomerDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
 
-# Product Views
-class ProductListCreateView(LoginRequiredMixin,generics.ListCreateAPIView):
+class ProductListCreateView(LoginRequiredMixin, generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    
-    
+
     def get_permissions(self):
         if self.request.method == 'POST':
             return [IsEmployee()]
         return super().get_permissions()
-
-class ProductListPageView(LoginRequiredMixin, TemplateView):
-    template_name = 'products.html'
 
 class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly]
-    
+
 class ProductUpdateView(UpdateView):
     model = Product
     fields = ['name', 'description', 'makeup', 'size', 'price', 'stock_status', 'imagepath']
     template_name = 'ski_manufacturing_app/product-edit.html'
     success_url = '/products/'
+#non-api version of order list
+from django.views.generic import ListView
 
-# Order Views
+class OrderListPageView(LoginRequiredMixin, ListView):
+    template_name = 'orders.html'
+    context_object_name = 'orders'
+    
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return Order.objects.all()
+        return Order.objects.filter(customer__user=self.request.user)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add order lines and product info to context
+        orders_with_details = []
+        for order in context['orders']:
+            order_lines = OrderLine.objects.filter(order=order)
+            orders_with_details.append({
+                'order': order,
+                'lines': order_lines
+            })
+        context['orders_with_details'] = orders_with_details
+        return context
+
+#api version of order list
 class OrderListCreateView(generics.ListCreateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderReadSerializer
@@ -89,220 +102,106 @@ class OrderListCreateView(generics.ListCreateAPIView):
 class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderReadSerializer
-    
-class OrderListPageView(LoginRequiredMixin, TemplateView):
-    template_name = 'orders.html'
 
-# OrderLine Views
-class OrderLineListCreateView(generics.ListCreateAPIView):
-    queryset = OrderLine.objects.all()
-    serializer_class = OrderLineSerializer
-
-class OrderLineDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = OrderLine.objects.all()
-    serializer_class = OrderLineSerializer
-
-
-
-
-
-#def HomepageView(TemplateView): 
+# Template Views
 class HomepageView(TemplateView):
     template_name = 'ski_manufacturing_app/homepage.html'
 
-# add product view:
+class ProductListPageView(LoginRequiredMixin, TemplateView):
+    template_name = 'products.html'
+
 class ProductAddView(CreateView):
     model = Product
     fields = ['name', 'description', 'makeup', 'size', 'price', 'stock_status', 'imagepath']
     template_name = 'ski_manufacturing_app/add-product.html'
     success_url = '/products/'
 
-#def ProductList(ListView):
-class ProductDetail(DetailView):
-    model = Product
-    template_name = 'ski_manufacturing_app/product-detail.html'
-    context_object_name = 'product'
-
-#class ProductDetail(DetailView):
-class ProductDetail(DetailView):
-    model = Product
-    template_name = 'ski_manufacturing_app/product-detail.html'
-    context_object_name = 'product'
-
-#def OrderCreate(CreateView):
-class OrderCreate(CreateView):
-    model = Order
-    fields = ['customer', 'payment', 'status']
-    template_name = 'ski_manufacturing_app/order-create.html'
-    success_url = '/orderlist'
-    
-#order create for BUY_PRODUCT
-
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def create_order(request):
-    # --- Add this block right at the start ---
-    if not hasattr(request.user, 'customer'):
-        return Response({'error': 'You must have a customer profile to place an order.'}, status=status.HTTP_400_BAD_REQUEST)
-    # -----------------------------------------
-
-    try:
-        # Get product info
-        product_id = request.data.get('product_id')
-        quantity = int(request.data.get('quantity', 1))
-        product = Product.objects.get(id=product_id)
-        
-        # Create order data without payment
-        order_data = {
-            "customer": request.user.customer.id,
-            "status": "completed",
-            "order_lines": [{
-                "product": product_id,
-                "quantity": quantity,
-                "unit_price": str(product.price),
-                "total_price": str(product.price * quantity)
-            }]
-        }
-
-        serializer = OrderWriteSerializer(data=order_data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-#class OrderDetail(DetailView):
-class OrderDetail(DetailView):
-    model = Order
-    template_name = 'ski_manufacturing_app/order-detail.html'
-    context_object_name = 'order'
-
-# #class buy_product:
-# class BuyProductView(DetailView):
-#     model = Product  # Specify the model to use
-#     template_name = 'buy_product.html'  # Specify the template to render
-#     context_object_name = 'product'  # Name of the object in the template
-#     # Define the URL pattern for this view
-#     def buy_product(request, product_id):
-#         product = get_object_or_404(Product, id=product_id)
-#         if request.method == 'GET':
-#             return render(request, 'buy_product.html', {'product': product})
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-
+@method_decorator(login_required, name='dispatch')
 class BuyProductView(DetailView):
     model = Product
     template_name = 'buy_product.html'
+    context_object_name = 'product'
 
     def post(self, request, *args, **kwargs):
         product = self.get_object()
         quantity = int(request.POST.get('quantity', 1))
         
-        try:
-            response = requests.post(
-                'http://localhost:8000/api/orders/',
-                json={
-                    "product_id": product.id,
-                    "quantity": quantity
-                },
-                headers={
-                    'X-CSRFToken': request.COOKIES.get('csrftoken'),
-                    'Content-Type': 'application/json'
-                },
-                cookies=request.COOKIES
-            )
-            
-            if response.status_code == 201:
-                return redirect('order-confirmation')
-            
-            try:
-                error_data = response.json()
-                error_msg = error_data.get('error') or error_data.get('detail') or 'Order failed'
-            except Exception:
-                error_msg = response.text if response.text else 'Order failed'
-
+        if not hasattr(request.user, 'customer'):
             return render(request, self.template_name, {
-                'error': error_msg,
-                'product': product
+                'product': product,
+                'error': 'You must have a customer profile to place an order.'
             })
 
+        try:
+            # Create order
+            order = Order.objects.create(
+                customer=request.user.customer,
+                status='completed'
+            )
+            # Create order line
+            OrderLine.objects.create(
+                order=order,
+                product=product,
+                quantity=quantity,
+                unit_price=product.price,
+                total_price=product.price * quantity
+            )
+            # Update stock
+            product.stock_status -= quantity
+            product.save()
+            return redirect('order-page')
             
         except Exception as e:
             return render(request, self.template_name, {
-                'error': str(e),
-                'product': product
+                'product': product,
+                'error': f'Order failed: {str(e)}'
             })
 
-        
-        # Call order creation API@api_view(['POST'])
+@api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def create_order(request):
-    # --- Add this block right at the start ---
-    if not hasattr(request.user, 'customer'):
-        return Response({'error': 'You must have a customer profile to place an order.'}, status=status.HTTP_400_BAD_REQUEST)
-    # -----------------------------------------
+    # Handle GET requests
+    if request.method == 'GET':
+        orders = Order.objects.filter(customer__user=request.user)
+        order_data = []
+        for order in orders:
+            order_line = order.orderline_set.first()
+            order_data.append({
+                'id': order.id,
+                'customer_name': order.customer.user.username,
+                'product_name': order_line.product.name if order_line else "Unknown",
+                'quantity': order_line.quantity if order_line else 0,
+                'status': order.status,
+                'date': order.date.strftime('%Y-%m-%d %H:%M:%S')
+            })
+        return Response(order_data)
 
-    try:
-        # Get product info
-        product_id = request.data.get('product_id')
-        quantity = int(request.data.get('quantity', 1))
-        product = Product.objects.get(id=product_id)
+    # Handle POST requests
+    elif request.method == 'POST':
+        if not hasattr(request.user, 'customer'):
+            return Response({'error': 'Customer profile required'}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Create order data without payment
-        order_data = {
-            "customer": request.user.customer.id,
-            "status": "completed",
-            "order_lines": [{
-                "product": product_id,
-                "quantity": quantity,
-                "unit_price": str(product.price),
-                "total_price": str(product.price * quantity)
-            }]
-        }
-
-        serializer = OrderWriteSerializer(data=order_data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-        response = create_order(request._request)
-        if response.status_code == 201:
-            return redirect('order-confirmation')
-        return render(request, 'buy_product.html', {'error': 'Order failed'})
-'''
-from django.http import JsonResponse
-
-class BuyProductView(DetailView):
-    def buy_product(request, product_id):
-        product = get_object_or_404(Product, id=product_id)
-        if request.method == 'GET':
-            return render(request, 'buy_product.html', {'product': product})
-        elif request.method == 'POST':
-            data = json.loads(request.body)
-            quantity = data.get('quantity')
-            payment_details = data.get('payment_details')
-
-            # Validate payment details (basic example)
-            if not payment_details or not all(k in payment_details for k in ('card_number', 'exp_date', 'ccv')):
-                return JsonResponse({'error': 'Invalid payment details'}, status=400)
-
-            # Create the order
-            order = Order.objects.create(
-                product=product,
-                user=request.user,
-                quantity=quantity,
-                payment_status='Paid'
-            )
-            return JsonResponse({'message': 'Order placed successfully', 'order_id': order.id}, status=201)
-'''
+        try:
+            product_id = request.data.get('product_id')
+            quantity = int(request.data.get('quantity', 1))
+            product = Product.objects.get(id=product_id)
+            
+            order_data = {
+                "customer": request.user.customer.id,
+                "status": "completed",
+                "order_lines": [{
+                    "product": product_id,
+                    "quantity": quantity,
+                    "unit_price": str(product.price),
+                    "total_price": str(product.price * quantity)
+                }]
+            }
+            
+            serializer = OrderWriteSerializer(data=order_data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

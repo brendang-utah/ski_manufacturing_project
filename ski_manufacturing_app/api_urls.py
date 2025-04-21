@@ -27,8 +27,8 @@ urlpatterns = [
     path('orders/', create_order, name='order-create'),
 
     # OrderLine
-    path('orderlines/', OrderLineListCreateView.as_view(), name='orderline-list-create'),
-    path('orderlines/<int:pk>/', OrderLineDetailView.as_view(), name='orderline-detail'),
+    # path('orderlines/', OrderLineListCreateView.as_view(), name='orderline-list-create'),
+    # path('orderlines/<int:pk>/', OrderLineDetailView.as_view(), name='orderline-detail'),
 
 
 ]

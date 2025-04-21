@@ -45,27 +45,20 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = '__all__'
 
-class OrderReadSerializer(serializers.ModelSerializer):
-    customer = CustomerSerializer(read_only=True)
-    
-    class Meta:
-        model = Order
-        fields = '__all__'
 
-# serializers.py
 class OrderLineSerializer(serializers.ModelSerializer):
-    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
+    product_name = serializers.CharField(source='product.name', read_only=True)
     
     class Meta:
         model = OrderLine
-        fields = ['product', 'quantity', 'unit_price', 'total_price']
+        fields = ['product', 'product_name', 'quantity', 'unit_price', 'total_price']
 
 class OrderWriteSerializer(serializers.ModelSerializer):
-    order_lines = OrderLineSerializer(many=True)
-    
+    order_lines = OrderLineSerializer(many=True, source='orderline_set')
+
     class Meta:
         model = Order
-        fields = ['customer', 'status', 'order_lines']  # Remove 'payment'
+        fields = ['customer', 'status', 'order_lines']
         read_only_fields = ['status']
 
     def create(self, validated_data):
@@ -73,13 +66,23 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         order = Order.objects.create(**validated_data)
         
         for line_data in order_lines_data:
-            OrderLine.objects.create(order=order, **line_data)
-            # Update product stock
             product = line_data['product']
+            OrderLine.objects.create(
+                order=order,
+                **line_data
+            )
             product.stock_status -= line_data['quantity']
             product.save()
-        
         return order
+
+class OrderReadSerializer(serializers.ModelSerializer):
+    customer = serializers.StringRelatedField()
+    order_lines = OrderLineSerializer(many=True, source='orderline_set')  # Add source
+    class Meta:
+        model = Order
+        fields = '__all__'
+
+
 
 
 
