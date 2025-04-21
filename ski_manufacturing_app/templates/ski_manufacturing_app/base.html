@@ -5,33 +5,43 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         .nav-bar {
-            background-color: #f8f9fa;
-            padding: 10px;
+            background-color: #0056b3;
+            padding: 15px;
             margin-bottom: 20px;
         }
         .nav-bar a {
             margin-right: 15px;
             text-decoration: none;
-            color: #333;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
         }
         .nav-bar a:hover {
-            color: #007bff;
+            background-color: #004494;
+            color: white;
+            text-decoration: none;
+        }
+        .home-button {
+            font-weight: bold;
+            background-color: #004494;
+            padding: 8px 15px;
+            border-radius: 4px;
         }
         #auth-status {
             position: absolute;
             top: 10px;
             right: 10px;
-        }
-        .home-button {
-            font-weight: bold;
-            color: #007bff !important;
+            background-color: #f1f1f1;
+            padding: 10px;
+            border-radius: 5px;
         }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
 <body>
     <div class="nav-bar">
-        <a href="{% url 'home-page' %}" class="home-button">Home</a>
+        <a href="{% url 'home-page' %}" class="home-button">🏠 Home</a>
         <a href="{% url 'product-page' %}">Products</a>
         <a href="{% url 'order-page' %}">Orders</a>
         {% if user.is_staff %}
