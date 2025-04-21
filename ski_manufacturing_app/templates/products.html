@@ -1,25 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Product List</title>
-    <!-- Include jQuery from CDN -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-        .btn { margin: 2px; }
-        .product-item { border: 1px solid #ddd; margin: 10px 0; padding: 10px; }
-        #auth-status { position: absolute; top: 10px; right: 10px; }
-    </style>
-</head>
-<body>
-    <div id="auth-status">
-        {% if user.is_authenticated %}
-            Welcome, {{ user.username }}!
-            <a href="{% url 'logout' %}">Logout</a>
-        {% else %}
-            <a href="{% url 'login' %}">Login</a>
-        {% endif %}
-    </div>
+{% extends 'ski_manufacturing_app/base.html' %}
 
+{% block title %}Product List{% endblock %}
+
+{% block content %}
     <h1>Product List</h1>
 
     {% if user.is_authenticated and user.is_staff %}
@@ -111,5 +94,8 @@
 
     // You can add similar handlers for Edit and Add Product
     </script>
-</body>
+{% endblock %}
+
+{% block extra_scripts %}
+    <!-- Your existing JavaScript code -->
 </html>
