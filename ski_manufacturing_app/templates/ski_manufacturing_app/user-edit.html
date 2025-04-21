@@ -45,55 +45,50 @@
     </div>
 
     <script>
-    // Get user ID from URL
-    const userId = window.location.pathname.split('/')[2];
-
-    // Fetch and populate user data
-    fetch(`/api/users/${userId}/`)
-      .then(response => response.json())
-      .then(user => {
-          document.getElementById('username').value = user.username;
-          document.getElementById('email').value = user.email;
-          document.getElementById('is_staff').checked = user.is_staff;
-      });
-
-    // Form submission handler
-    document.getElementById('edit-user-form').addEventListener('submit', function(event) {
-        event.preventDefault();
-        const formData = new FormData(this);
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-        // Convert FormData to JSON
-        const userData = {};
-        formData.forEach((value, key) => {
-            if (key === 'is_staff') {
-                userData[key] = document.getElementById(key).checked; // Handle checkbox
-            } else if (key === 'password' && value === '') {
-                // Skip password if left blank
-                return;
-            } else {
-                userData[key] = value;
-            }
-        });
-
-        fetch(`/api/users/${userId}/`, {
-            method: 'PUT',
-            body: JSON.stringify(userData),
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            credentials: 'include'
-        })
-        .then(response => {
-            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const userId = window.location.pathname.split('/')[2];
+        
+        // Fetch user data
+        fetch(`/api/users/${userId}/`)
+          .then(response => {
+            if (!response.ok) throw new Error('User not found');
+            return response.json();
+          })
+          .then(user => {
+            document.getElementById('username').value = user.username;
+            document.getElementById('email').value = user.email;
+            document.getElementById('is_staff').checked = user.is_staff;
+          })
+          .catch(error => {
+            alert(error.message);
             window.location.href = '/users/';
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert(`Error saving changes: ${error.message}`);
+          });
+        
+        // Handle form submission
+        document.getElementById('edit-user-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                is_staff: document.getElementById('is_staff').checked
+            };
+            
+            const password = document.getElementById('password').value;
+            if (password) formData.password = password;
+        
+            fetch(`/api/users/${userId}/`, {
+                method: 'PATCH',  // Use PATCH instead of PUT
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                if (response.status === 200) window.location.href = '/users/';
+                else throw new Error('Update failed');
+            })
+            .catch(error => alert(error.message));
         });
-    });
-    </script>
+        </script>
 </body>
 </html>

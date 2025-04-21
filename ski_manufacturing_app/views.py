@@ -28,18 +28,22 @@ class UserAddView(CreateView):
     success_url = '/users/'
     
 class UserUpdateView(UpdateView):
-    model = Product
-    fields = ['username','email','password']
+    model = User
+    fields = ['username', 'email']
     template_name = 'ski_manufacturing_app/user-edit.html'
     success_url = '/users/'
+
 
 class UserListCreateView(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [permissions.IsAdminUser]  # Add this
 
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [permissions.IsAdminUser]  # Add this
+
 
 class IsEmployee(permissions.BasePermission):
     def has_permission(self, request, view):
