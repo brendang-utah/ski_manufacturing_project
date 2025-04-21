@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User List</title>
+    <!-- Include jQuery from CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .btn { margin: 2px; }
+        .user-item { border: 1px solid #ddd; margin: 10px 0; padding: 10px; }
+        #auth-status { position: absolute; top: 10px; right: 10px; }
+    </style>
+</head>
+<body>
+    <div id="auth-status">
+        {% if user.is_authenticated %}
+            Welcome, {{ user.username }}!
+            <a href="{% url 'logout' %}">Logout</a>
+        {% else %}
+            <a href="{% url 'login' %}">Login</a>
+        {% endif %}
+    </div>
+
+    <h1>User List</h1>
+
+    {% if user.is_authenticated and user.is_staff %}
+        <a href="/users/add/" id="add-user" class="btn btn-primary">Add User</a>
+    {% endif %}
+
+    <div id="user-list"></div>
+
+    <script>
+    // Pass staff status from Django to JS
+    var isStaff = {{ user.is_staff|yesno:"true,false" }};
+    var isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
+
+    // Utility to get CSRF token from cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    var csrftoken = getCookie('csrftoken');
+
+    // Load users on page load
+    $(document).ready(function() {
+        loadUsers();
+    });
+
+    function loadUsers() {
+        $.ajax({
+            url: '/api/users/',
+            type: 'GET',
+            dataType: 'json',
+            success: function(users) {
+                $('#user-list').empty();
+                if (users.length === 0) {
+                    $('#user-list').append('<p>No users found.</p>');
+                }
+                users.forEach(function(user) {
+                    let userHtml = `
+                        <div class="user-item" data-id="${user.id}">
+                            <h2>${user.username}</h2>
+                            <p>Email: ${user.email || 'N/A'}</p>
+                            <p>Role: ${user.is_staff ? 'Staff' : 'User'}</p>
+                            ${isStaff ? `
+                                <button class="btn btn-warning edit-user" onclick="window.location.href='/users/' + ${user.id} + '/edit/'">Edit</button>
+                                <button class="btn btn-danger delete-user">Delete</button>
+                            ` : ''}
+                        </div>
+                    `;
+                    $('#user-list').append(userHtml);
+                });
+            },
+            error: function(error) {
+                $('#user-list').html('<p>Error loading users.</p>');
+            }
+        });
+    }
+
+    // Delete user (staff only)
+    $('#user-list').on('click', '.delete-user', function() {
+        if (!confirm('Are you sure you want to delete this user?')) return;
+        let userId = $(this).closest('.user-item').data('id');
+        $.ajax({
+            url: `/api/users/${userId}/`,
+            type: 'DELETE',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function() {
+                loadUsers(); // Refresh the list
+            },
+            error: function(error) {
+                alert('Error deleting user.');
+            }
+        });
+    });
+
+    // You can add similar handlers for Edit and Add User
+    </script>
+</body>
+</html>
